@@ -1,6 +1,6 @@
 import type { FieldClass, RawInputAccess, InputAccessSignal } from './types';
 
-const CARD_RE = /(card|cc[-_]?num|pan)/i;
+const CARD_RE = /(card|cc[-_]?num|\bpan\b)/i;
 const CVC_RE = /(cvc|cvv|csc)/i;
 
 export function classifyField(

@@ -25,6 +25,12 @@ describe('detectComponentType', () => {
   it('Tooltip from role=tooltip', () => {
     expect(detectComponentType({ ...base, role: 'tooltip' }).type).toBe('Tooltip');
   });
+  it('Dropdown from role=listbox', () => {
+    expect(detectComponentType({ ...base, role: 'listbox' }).type).toBe('Dropdown');
+  });
+  it('Dropdown from <select>', () => {
+    expect(detectComponentType({ ...base, tag: 'select' }).type).toBe('Dropdown');
+  });
   it('Input from <input>', () => {
     expect(detectComponentType({ ...base, tag: 'input', inputType: 'text' }).type).toBe('Input');
   });

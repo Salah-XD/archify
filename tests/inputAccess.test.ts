@@ -34,4 +34,14 @@ describe('toInputAccessSignal', () => {
     expect(sig.scriptOrigin).toBe('tag.cdn.io');
     expect(sig.via).toBe('listener');
   });
+  it('null scriptUrl → null origin', () => {
+    const raw: RawInputAccess = {
+      fieldTag: 'input', inputType: 'text', autocomplete: null,
+      name: null, scriptUrl: null, via: 'value-read',
+    };
+    expect(toInputAccessSignal(raw).scriptOrigin).toBeNull();
+  });
+  it('does not false-positive "japan" as a card field', () => {
+    expect(classifyField('input', 'text', null, 'japan')).toBe('text');
+  });
 });
