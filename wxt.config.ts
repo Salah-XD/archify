@@ -15,5 +15,6 @@ export default defineConfig({
       default_popup: 'popup/index.html',
       default_title: 'Archify',
     },
+    web_accessible_resources: [{ resources: ['injected.js'], matches: ['<all_urls>'] }],
   },
 });
