@@ -1,0 +1,21 @@
+# Glasswatch is a separate product — lives in its own repo
+new project idea/
+
+# Dependencies
+node_modules/
+
+# Build output (WXT)
+.output/
+.wxt/
+dist/
+
+# Env / local
+.env
+.env.local
+*.log
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
