@@ -94,3 +94,39 @@ export interface PageProfile {
   hosting: HostingProfile;
   security: SecurityRollup;
 }
+
+// ---- Architecture Flow (Bet B) ----
+export type FlowConfidence = 'high' | 'med';
+export type FlowStepKind = 'api' | 'storage' | 'nav';
+export type StorageClass = 'token' | 'session' | 'cookie' | 'other';
+export type StorageArea = 'local' | 'session' | 'cookie';
+export type NavKind = 'push' | 'replace' | 'pop';
+
+export interface Attribution {
+  interactionId: number;
+  confidence: FlowConfidence;
+}
+
+export interface FlowStep {
+  kind: FlowStepKind;
+  confidence: FlowConfidence;
+  // api
+  method?: string;
+  url?: string;
+  status?: number | null;
+  latencyMs?: number | null;
+  // storage
+  storageClass?: StorageClass;
+  storageKey?: string;
+  storageArea?: StorageArea;
+  // nav
+  to?: string;
+  navKind?: NavKind;
+}
+
+export interface InteractionFlow {
+  id: number;
+  component: string | null;
+  type: string;
+  steps: FlowStep[];
+}
