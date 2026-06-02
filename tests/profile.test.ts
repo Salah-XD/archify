@@ -19,6 +19,17 @@ describe('rollupSecurity', () => {
     expect(r.thirdPartyDomains).toBe(2);
     expect(r.sensitiveReaders).toBe(1);
   });
+  it('counts DISTINCT sensitive-field scripts, not raw listener entries', () => {
+    const r = rollupSecurity({
+      scripts: [], network: [],
+      inputAccess: [
+        { field: 'password', scriptOrigin: 't.io', via: 'listener' } as InputAccessSignal,
+        { field: 'password', scriptOrigin: 't.io', via: 'listener' } as InputAccessSignal, // same script, 2 listeners
+        { field: 'card', scriptOrigin: null, via: 'listener' } as InputAccessSignal,        // unattributed → 1 unknown
+      ],
+    });
+    expect(r.sensitiveReaders).toBe(2); // {t.io} + 1 unknown
+  });
 });
 
 describe('assembleProfile', () => {

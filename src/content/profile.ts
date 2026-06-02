@@ -10,11 +10,15 @@ export function rollupSecurity(s: {
 }): SecurityRollup {
   const domains = new Set(s.network.filter((n) => n.isThirdParty).map((n) => n.origin).filter(Boolean));
   const sensitive = s.inputAccess.filter((a) => a.field === 'password' || a.field === 'card' || a.field === 'cvc');
+  // The popup label says "scripts reading sensitive fields" — count DISTINCT scripts,
+  // not raw listener entries. Unattributed (null-origin) readers collapse to one "unknown".
+  const knownOrigins = new Set(sensitive.map((a) => a.scriptOrigin).filter((o): o is string => !!o));
+  const hasUnknownReader = sensitive.some((a) => !a.scriptOrigin);
   return {
     thirdPartyScripts: s.scripts.filter((x) => x.isThirdParty).length,
     totalScripts: s.scripts.length,
     thirdPartyDomains: domains.size,
-    sensitiveReaders: sensitive.length,
+    sensitiveReaders: knownOrigins.size + (hasUnknownReader ? 1 : 0),
   };
 }
 

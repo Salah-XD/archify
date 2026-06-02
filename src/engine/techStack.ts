@@ -13,6 +13,8 @@ interface Fingerprint {
 export const TECH_FINGERPRINTS: Fingerprint[] = [
   // framework
   { name: 'Next.js', category: 'framework', confidence: 96, globals: ['__NEXT_DATA__'], scriptSrcs: ['/_next/'] },
+  // Ceiling: the hook is installed by the React DevTools *extension*, not React itself —
+  // React-only pages without DevTools miss here (Next is still caught via __NEXT_DATA__).
   { name: 'React', category: 'framework', confidence: 90, globals: ['__REACT_DEVTOOLS_GLOBAL_HOOK__'] },
   { name: 'Vue.js', category: 'framework', confidence: 90, globals: ['__VUE__', '__VUE_DEVTOOLS_GLOBAL_HOOK__'] },
   { name: 'Nuxt', category: 'framework', confidence: 92, globals: ['__NUXT__', '$nuxt'] },
