@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import type { SignalStore } from '../content/signalStore';
 
-const GLASSWATCH_URL = 'https://glasswatch.io/?utm_source=archify&utm_medium=extension&utm_campaign=security_tab';
+const GLASSWATCH_URL = 'https://glasswatch.vercel.app/?utm_source=archify&utm_medium=extension&utm_campaign=security_tab';
 
 export function SecurityTab({ store }: { store: SignalStore }) {
   const { scripts, network, inputAccess } = store.security();

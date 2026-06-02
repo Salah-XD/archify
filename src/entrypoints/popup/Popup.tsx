@@ -108,7 +108,7 @@ function Profile({ profile }: { profile: PageProfile }) {
           </div>
         </div>
         <a
-          href="https://glasswatch.io/?utm_source=archify&utm_medium=extension&utm_campaign=popup_profile"
+          href="https://glasswatch.vercel.app/?utm_source=archify&utm_medium=extension&utm_campaign=popup_profile"
           target="_blank"
           rel="noopener noreferrer"
           className="mt-1.5 flex items-center justify-between border border-ink/80 px-2 py-1.5 text-[10px] hover:bg-ink hover:text-paper"

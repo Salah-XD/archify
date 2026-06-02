@@ -14,6 +14,20 @@
 
 html { background: var(--color-paper); color: var(--color-ink); }
 
+/* Scrollbar themed to the draughtsman palette — paper track, ink thumb, redline on hover. */
+html {
+  scrollbar-width: thin;                                   /* Firefox */
+  scrollbar-color: var(--color-muted) var(--color-paper-2);
+}
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--color-paper-2); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-2);
+  border: 3px solid var(--color-paper-2);                  /* inset look via paper-colored border */
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-redline); }
+::-webkit-scrollbar-corner { background: var(--color-paper-2); }
+
 /* Smooth anchor navigation — only when the user hasn't asked to reduce motion. */
 @media (prefers-reduced-motion: no-preference) {
   html { scroll-behavior: smooth; }
