@@ -28,16 +28,29 @@ export default defineUnlistedScript(() => {
   }
 
   const INTERACTIVE = 'button, a, input, select, textarea, summary, [role="button"], [onclick]';
-  const onInteract = (e: Event) => {
-    if (!e.isTrusted) return;
-    const t = e.target as Element | null;
-    if (!(t instanceof Element)) return;
+  // Keyboard "activation" only applies to controls a key actually activates — not text entry,
+  // so typing Space/Enter in a field doesn't fragment attribution (one interaction per keystroke).
+  const ACTIVATABLE = 'button, a, summary, [role="button"], input[type="submit"], input[type="button"], input[type="checkbox"], input[type="radio"]';
+  const beginFrom = (t: Element) => {
     if (t.closest('#archify-overlay-host')) return;
     openInteraction(t.closest(INTERACTIVE) ?? t);
   };
-  document.addEventListener('click', onInteract, true);
-  document.addEventListener('submit', onInteract, true);
-  document.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') onInteract(e); }, true);
+  document.addEventListener('click', (e) => {
+    if (!e.isTrusted || !(e.target instanceof Element)) return;
+    beginFrom(e.target);
+  }, true);
+  document.addEventListener('submit', (e) => {
+    if (!e.isTrusted) return;
+    // Attribute to the button that triggered submission when the browser provides it.
+    const submitter = (e as SubmitEvent).submitter;
+    if (submitter instanceof Element) beginFrom(submitter);
+    else if (e.target instanceof Element) beginFrom(e.target);
+  }, true);
+  document.addEventListener('keydown', (e) => {
+    if (!e.isTrusted || (e.key !== 'Enter' && e.key !== ' ')) return;
+    const t = e.target as Element | null;
+    if (t instanceof Element && t.closest(ACTIVATABLE)) beginFrom(t);
+  }, true);
 
   // 1) fetch interception
   const origFetch = window.fetch;
@@ -71,7 +84,7 @@ export default defineUnlistedScript(() => {
       this.addEventListener('loadend', () => {
         post({ kind: 'network', payload: { method: meta.method, url: meta.url, status: this.status || null,
           latencyMs: Math.round(performance.now() - meta.started), startedAt: meta.started, attribution } });
-      });
+      }, { once: true });
     }
     return origSend.apply(this, a as []);
   };
@@ -155,14 +168,14 @@ export default defineUnlistedScript(() => {
   const origPush = history.pushState;
   history.pushState = function (...a: any[]) {
     const r = origPush.apply(this, a as []);
-    post({ kind: 'nav', payload: { to: String(a[2] ?? location.href), kind: 'push', attribution: tag() } });
+    post({ kind: 'nav', payload: { to: String(a[2] || location.href), kind: 'push', attribution: tag() } });
     reprobe();
     return r;
   };
   const origReplace = history.replaceState;
   history.replaceState = function (...a: any[]) {
     const r = origReplace.apply(this, a as []);
-    post({ kind: 'nav', payload: { to: String(a[2] ?? location.href), kind: 'replace', attribution: tag() } });
+    post({ kind: 'nav', payload: { to: String(a[2] || location.href), kind: 'replace', attribution: tag() } });
     reprobe();
     return r;
   };
