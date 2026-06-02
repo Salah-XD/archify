@@ -71,7 +71,7 @@ function Profile({ profile }: { profile: PageProfile }) {
         ) : (
           groupByCategory(stack).map(([cat, items]) => (
             <div key={cat} className="flex gap-2 py-0.5">
-              <span className="w-[78px] shrink-0 text-[9px] uppercase tracking-[0.16em] text-muted">{cat}</span>
+              <span className="w-[68px] shrink-0 text-[8px] uppercase tracking-[0.12em] text-muted/70">{cat}</span>
               <span className="text-ink">{items.map((d) => d.name).join(' · ')}</span>
             </div>
           ))
@@ -124,8 +124,13 @@ function Profile({ profile }: { profile: PageProfile }) {
 function Section({ title, children }: { title: string; children: import('react').ReactNode }) {
   return (
     <div>
-      <div className="mb-1 text-[9px] tracking-[0.2em] text-muted">{title}</div>
-      {children}
+      {/* labeled-rule header: redline tick + ink title + hairline — clearly a section, not a row */}
+      <div className="mb-1.5 flex items-center gap-2">
+        <span className="h-1 w-1 shrink-0 bg-redline" />
+        <span className="text-[9px] font-semibold tracking-[0.28em] text-ink">{title}</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+      <div className="pl-3">{children}</div>
     </div>
   );
 }
