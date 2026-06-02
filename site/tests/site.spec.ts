@@ -4,7 +4,7 @@ test('landing page renders the hero and the architecture trace', async ({ page }
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Understand Software.' })).toBeVisible();
   await expect(page.getByText('ARCHITECTURE TRACE · example.com')).toBeVisible();
-  await expect(page.getByText('<LoginButton/>')).toBeVisible();
+  await expect(page.getByText('<LoginButton/>').first()).toBeVisible();
 });
 
 test('navbar is present with anchor links', async ({ page }) => {
