@@ -2,8 +2,35 @@
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
 import LiveDemo from '../components/LiveDemo.svelte';
+import FeatureCard from '../components/FeatureCard.astro';
+import DetectPanel from '../components/DetectPanel.astro';
 ---
 <Base>
   <Hero />
   <LiveDemo client:visible />
+
+  <section class="mx-auto max-w-5xl px-6 py-16">
+    <div class="mb-6 flex items-center gap-2">
+      <span class="h-1 w-1 bg-redline"></span>
+      <span class="text-[10px] font-semibold tracking-[0.28em] text-ink">WHAT IT DOES</span>
+      <span class="h-px flex-1 bg-line"></span>
+    </div>
+    <div class="grid gap-4 md:grid-cols-3">
+      <FeatureCard label="ARCHITECTURE" title="See the system, not the markup"
+        body="Hover any element for its framework, component, library, and the APIs it triggers." />
+      <FeatureCard label="SECURITY" title="See what touches your data"
+        body="Third-party scripts, outbound calls, and which scripts can read payment fields." />
+      <FeatureCard label="LOCAL-FIRST" title="Nothing leaves your browser"
+        body="100% local analysis. No accounts, no servers, no telemetry. Open source." />
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-5xl px-6 py-16">
+    <div class="mb-6 flex items-center gap-2">
+      <span class="h-1 w-1 bg-redline"></span>
+      <span class="text-[10px] font-semibold tracking-[0.28em] text-ink">WHAT IT DETECTS</span>
+      <span class="h-px flex-1 bg-line"></span>
+    </div>
+    <DetectPanel />
+  </section>
 </Base>
