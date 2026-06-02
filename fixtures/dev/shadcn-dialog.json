@@ -1,0 +1,6 @@
+{
+  "name": "shadcn dialog (dev build)",
+  "dom": { "tag": "div", "role": "dialog", "dataAttributes": ["data-state"], "ariaAttributes": ["aria-modal"], "classList": ["fixed", "rounded-lg"], "inputType": null, "autocomplete": null },
+  "frameworkSignals": { "hasReactDevtoolsHook": true, "hasReactFiberKeys": true, "hasNextData": true, "hasVueInstance": false, "hasVueDevtoolsHook": false, "hasNgGlobal": false, "ngVersionAttr": null, "hasSvelteClass": false },
+  "expect": { "framework": "Next.js", "type": "Dialog", "library": "unknown" }
+}

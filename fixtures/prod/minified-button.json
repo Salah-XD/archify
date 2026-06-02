@@ -1,0 +1,6 @@
+{
+  "name": "minified button (prod build)",
+  "dom": { "tag": "button", "role": null, "dataAttributes": [], "ariaAttributes": [], "classList": ["css-1q2w3e"], "inputType": null, "autocomplete": null },
+  "frameworkSignals": { "hasReactDevtoolsHook": true, "hasReactFiberKeys": true, "hasNextData": false, "hasVueInstance": false, "hasVueDevtoolsHook": false, "hasNgGlobal": false, "ngVersionAttr": null, "hasSvelteClass": false },
+  "expect": { "framework": "React", "type": "Button", "library": "unknown" }
+}
