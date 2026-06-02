@@ -18,6 +18,16 @@ Modern apps are harder to understand than ever. DevTools shows you the *implemen
 
 It runs entirely in your browser. No servers, no accounts, no telemetry.
 
+## Why this matters
+
+Understanding code — not writing it — is where developers spend most of their time, and AI coding is intensifying that:
+
+- **~58%** of developer time goes to program comprehension, not writing code — [Xia et al., IEEE TSE](https://baolingfeng.github.io/papers/tsecomprehension.pdf) (field study, 78 developers, telemetry-based).
+- **66%** of developers say AI's code is "almost right, but not quite" — [Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/ai) (n = 49,009).
+- **59%** have shipped AI-generated code they didn't fully understand — [Clutch, 2025](https://clutch.co/resources/devs-use-ai-generated-code-they-dont-understand).
+
+Archify exists to make that understanding faster — locally, in the browser where much of it already happens.
+
 ## What it does
 
 - **Architecture intelligence** — hover any element for its framework, component type, library, and the real component name (on dev builds). Honest by design: it shows a confidence score and never fabricates a name on minified production code.

@@ -1,0 +1,43 @@
+---
+import SectionHeader from './SectionHeader.astro';
+const stats = [
+  {
+    n: '~58%',
+    label: 'of developer time goes to understanding code — not writing it.',
+    src: 'Xia et al., IEEE Transactions on Software Engineering — field study, 78 developers, telemetry-based',
+    href: 'https://baolingfeng.github.io/papers/tsecomprehension.pdf',
+  },
+  {
+    n: '66%',
+    label: 'of developers say AI’s code is “almost right, but not quite.”',
+    src: 'Stack Overflow Developer Survey 2025 (n = 49,009)',
+    href: 'https://survey.stackoverflow.co/2025/ai',
+  },
+  {
+    n: '59%',
+    label: 'have shipped AI-generated code they didn’t fully understand.',
+    src: 'Clutch, 2025 (n = 800)',
+    href: 'https://clutch.co/resources/devs-use-ai-generated-code-they-dont-understand',
+  },
+];
+---
+<section class="mx-auto max-w-5xl px-6 py-20">
+  <SectionHeader title="THE EVIDENCE" />
+  <div class="grid gap-4 md:grid-cols-3">
+    {stats.map((s) => (
+      <div class="flex flex-col border border-ink/70 bg-paper p-5">
+        <div class="font-mono text-4xl font-semibold leading-none text-redline">{s.n}</div>
+        <p class="mt-3 flex-1 text-[12px] leading-relaxed text-ink-2">{s.label}</p>
+        <a href={s.href} target="_blank" rel="noopener noreferrer"
+           class="mt-3 block border-t border-line pt-2 text-[10px] leading-snug text-muted hover:text-ink">
+          {s.src} ↗
+        </a>
+      </div>
+    ))}
+  </div>
+  <p class="mt-4 max-w-xl text-[11px] leading-relaxed text-muted">
+    Developers already spend more of that comprehension time in the browser than in the IDE
+    (27% vs 20%, same study). Archify meets the work where it already happens — and never fabricates:
+    every reading carries a confidence score.
+  </p>
+</section>
