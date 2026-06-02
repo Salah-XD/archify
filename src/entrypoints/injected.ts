@@ -97,4 +97,12 @@ export default defineUnlistedScript(() => {
   if (document.readyState === 'complete') snapshotGlobals();
   else window.addEventListener('load', snapshotGlobals, { once: true });
   setTimeout(snapshotGlobals, 2000);
+
+  // Re-probe after SPA route changes — globals can attach on a client-side navigation.
+  const reprobe = () => setTimeout(snapshotGlobals, 400);
+  const origPush = history.pushState;
+  history.pushState = function (...a: any[]) { const r = origPush.apply(this, a as []); reprobe(); return r; };
+  const origReplace = history.replaceState;
+  history.replaceState = function (...a: any[]) { const r = origReplace.apply(this, a as []); reprobe(); return r; };
+  window.addEventListener('popstate', reprobe);
 });

@@ -30,8 +30,8 @@ export default defineContentScript({
     });
 
     ctx.addEventListener(window, 'wxt:locationchange', () => {
-      store.reset();
-      pageGlobals = [];
+      store.reset(); // network/script signals are per-route
+      // Do NOT clear pageGlobals — window globals (framework/analytics) persist across SPA routes.
       fetchHostHeaders().then((h) => { hostHeaders = h; }); // refresh: SPA route may have different headers
     });
 
@@ -41,11 +41,16 @@ export default defineContentScript({
     browser.runtime.onMessage.addListener((msg: unknown) => {
       if (!msg || (msg as { type?: string }).type !== 'archify:getProfile') return;
       const sec = store.security();
-      const scriptSrcs = sec.scripts.map((s) => s.src).filter((s): s is string => !!s);
-      const assetOrigins = [
-        ...sec.scripts.map((s) => s.origin),
-        ...sec.network.map((n) => n.origin),
-      ].filter((o): o is string => !!o);
+      // Read scripts from the LIVE DOM (current at request time) so detection survives
+      // SPA navigation, which resets the accumulated store. Union with any store srcs.
+      const domScriptSrcs = Array.from(document.querySelectorAll('script'))
+        .map((s) => (s as HTMLScriptElement).src)
+        .filter(Boolean);
+      const scriptSrcs = [...new Set([...domScriptSrcs, ...sec.scripts.map((s) => s.src).filter((s): s is string => !!s)])];
+      const assetOrigins = [...new Set([
+        ...domScriptSrcs.map(hostnameOf).filter((o): o is string => !!o),
+        ...sec.network.map((n) => n.origin).filter((o): o is string => !!o),
+      ])];
       return Promise.resolve(
         assembleProfile({
           url: location.href,
@@ -65,6 +70,14 @@ export default defineContentScript({
     });
   },
 });
+
+function hostnameOf(url: string): string | null {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return null;
+  }
+}
 
 async function fetchHostHeaders(): Promise<Record<string, string>> {
   const read = (res: Response) => {
