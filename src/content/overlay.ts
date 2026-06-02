@@ -37,7 +37,9 @@ export function mountOverlay(store: SignalStore, globals: Partial<FrameworkSigna
   }, true);
 
   document.addEventListener('click', (e) => {
-    if (host.shadowRoot?.contains(e.target as Node)) return;
+    // document-level capture retargets shadow events to the host element,
+    // so check the host (not its shadowRoot) to ignore clicks inside the overlay
+    if (host.contains(e.target as Node)) return;
     locked = !locked;
   }, true);
 
