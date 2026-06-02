@@ -1,4 +1,4 @@
-import type { RawNetwork, RawScript, RawInputAccess, DomSignals, FrameworkSignals } from '../engine/types';
+import type { RawNetwork, RawScript, RawInputAccess, DomSignals, FrameworkSignals, Attribution } from '../engine/types';
 
 /**
  * v1.1 transport: a per-page nonce names a CustomEvent channel on `document`.
@@ -23,11 +23,14 @@ export interface HoverPayload {
 }
 
 export type InjectedMessage =
-  | { kind: 'network'; payload: RawNetwork }
+  | { kind: 'network'; payload: RawNetwork & { attribution: Attribution | null } }
   | { kind: 'script'; payload: RawScript }
   | { kind: 'inputAccess'; payload: RawInputAccess }
   | { kind: 'hover'; payload: HoverPayload }
-  | { kind: 'pageGlobals'; payload: { globals: string[] } };
+  | { kind: 'pageGlobals'; payload: { globals: string[] } }
+  | { kind: 'interaction'; payload: { id: number; component: string | null; dom: DomSignals } }
+  | { kind: 'storage'; payload: { area: 'local' | 'session' | 'cookie'; key: string; attribution: Attribution | null } }
+  | { kind: 'nav'; payload: { to: string; kind: 'push' | 'replace' | 'pop'; attribution: Attribution | null } };
 
 export function isInjectedMessage(d: unknown): d is InjectedMessage {
   return !!d && typeof d === 'object' && typeof (d as { kind?: unknown }).kind === 'string';
