@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <!-- Archify mark: an inspector viewport (ink frame) with a marked element (redline node) -->
+  <rect width="128" height="128" fill="#f6f4ee"/>
+  <!-- viewport frame -->
+  <rect x="22" y="22" width="84" height="84" fill="none" stroke="#18160f" stroke-width="7"/>
+  <!-- redline registration ticks -->
+  <g fill="#df4f25">
+    <rect x="14" y="14" width="14" height="4"/><rect x="14" y="14" width="4" height="14"/>
+    <rect x="100" y="14" width="14" height="4"/><rect x="110" y="14" width="4" height="14"/>
+    <rect x="14" y="110" width="14" height="4"/><rect x="14" y="100" width="4" height="14"/>
+    <rect x="100" y="110" width="14" height="4"/><rect x="110" y="100" width="4" height="14"/>
+  </g>
+  <!-- selected element: redline node -->
+  <rect x="50" y="50" width="28" height="28" fill="#df4f25"/>
+</svg>
