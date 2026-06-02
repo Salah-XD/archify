@@ -1,6 +1,7 @@
 import { isArchifyMessage } from '../shared/protocol';
 import { SignalStore } from '../content/signalStore';
 import type { FrameworkSignals } from '../engine/types';
+import { mountOverlay } from '../content/overlay';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -24,7 +25,6 @@ export default defineContentScript({
     // SPA navigation reset (per-tab session destroyed on navigation)
     ctx.addEventListener(window, 'wxt:locationchange', () => store.reset());
 
-    // NOTE: the overlay UI is mounted in Task 11. It will import and call
-    // mountOverlay(store, globals) here. Do not implement the overlay now.
+    mountOverlay(store, globals);
   },
 });
