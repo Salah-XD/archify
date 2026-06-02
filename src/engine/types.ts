@@ -52,3 +52,44 @@ export interface InputAccessSignal { field: FieldClass; scriptOrigin: string | n
 
 export interface NetworkSignal extends RawNetwork { origin: string | null; isThirdParty: boolean; }
 export interface ScriptSignal { src: string | null; origin: string | null; inline: boolean; isThirdParty: boolean; }
+
+// ---- Page Profile (v1.2) ----
+export type TechCategory =
+  | 'framework' | 'analytics' | 'monitoring' | 'payments' | 'cms'
+  | 'commerce' | 'chat' | 'auth' | 'cdn' | 'fonts' | 'tagmanager';
+
+export interface PageSignals {
+  globals: string[];        // known window keys present (probed in MAIN world)
+  scriptSrcs: string[];     // full <script> src URLs
+  metaGenerator: string | null;
+  cookieNames: string[];
+}
+
+export interface TechDetection {
+  name: string;
+  category: TechCategory;
+  confidence: number;       // 0–100
+  evidence: string;
+}
+
+export interface HostingProfile {
+  host: string | null;      // Vercel / Netlify / Cloudflare Pages / GitHub Pages
+  cdn: string | null;       // Cloudflare / CloudFront (AWS) / Fastly
+  server: string | null;    // nginx / Express / Next.js / ...
+  evidence: string[];
+}
+
+export interface SecurityRollup {
+  thirdPartyScripts: number;
+  totalScripts: number;
+  thirdPartyDomains: number;
+  sensitiveReaders: number;
+}
+
+export interface PageProfile {
+  url: string;
+  host: string;
+  stack: TechDetection[];
+  hosting: HostingProfile;
+  security: SecurityRollup;
+}
