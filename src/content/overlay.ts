@@ -3,6 +3,7 @@ import { createElement } from 'react';
 import { Overlay } from '../ui/Overlay';
 import type { SignalStore } from './signalStore';
 import type { HoverPayload } from '../shared/protocol';
+import { getHoverEnabled, setHoverEnabled, onHoverEnabledChange } from '../shared/settings';
 import css from '../app.css?inline';
 
 export interface OverlayController {
@@ -27,12 +28,13 @@ export function mountOverlay(store: SignalStore): OverlayController {
   document.documentElement.appendChild(host);
 
   const root: Root = createRoot(container);
-  let enabled = true;
+  let enabled = true;        // persisted setting (default ON); refreshed below
   let locked = false;
+  let hidden = false;        // soft-hide via Esc; cleared by the next hover
   let latest: HoverPayload | null = null;
 
   function paint() {
-    if (!enabled || !latest) {
+    if (!enabled || hidden || !latest) {
       host.style.display = 'none';
       root.render(null);
       return;
@@ -46,11 +48,21 @@ export function mountOverlay(store: SignalStore): OverlayController {
         hover: latest,
         store,
         locked,
-        onClose: () => { enabled = false; paint(); },
+        // ✕ turns the inspector OFF (persisted) until the popup toggle / shortcut turns it back on.
+        onClose: () => { enabled = false; latest = null; paint(); void setHoverEnabled(false); },
         onToggleLock: () => { locked = !locked; paint(); },
       }),
     );
   }
+
+  // Initial state + live updates from the popup toggle or the Ctrl+Shift+H command.
+  getHoverEnabled().then((v) => { enabled = v; paint(); });
+  onHoverEnabledChange((v) => {
+    enabled = v;
+    if (enabled) hidden = false;
+    else latest = null;
+    paint();
+  });
 
   // Click toggles lock (freeze on current element); clicks inside the overlay are ignored.
   document.addEventListener('click', (e) => {
@@ -59,20 +71,18 @@ export function mountOverlay(store: SignalStore): OverlayController {
     paint();
   }, true);
 
+  // Esc hides for now (returns on the next hover); it does NOT disable the inspector.
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-      if (locked) locked = false;
-      else enabled = false;
-      paint();
-    } else if (e.altKey && (e.key === 'a' || e.key === 'A')) {
-      enabled = !enabled;
-      paint();
-    }
+    if (e.key !== 'Escape') return;
+    if (locked) locked = false;
+    else hidden = true;
+    paint();
   }, true);
 
   return {
     onHover(p: HoverPayload) {
       if (!enabled || locked) return;
+      hidden = false; // a fresh hover clears the soft-hide
       latest = p;
       paint();
     },

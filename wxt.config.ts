@@ -16,5 +16,11 @@ export default defineConfig({
       default_title: 'Archify',
     },
     web_accessible_resources: [{ resources: ['injected.js'], matches: ['<all_urls>'] }],
+    commands: {
+      'toggle-hover': {
+        suggested_key: { default: 'Ctrl+Shift+H' },
+        description: 'Toggle the Archify hover inspector',
+      },
+    },
   },
 });

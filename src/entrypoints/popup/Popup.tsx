@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import type { PageProfile, TechDetection } from '../../engine/types';
+import { getHoverEnabled, setHoverEnabled } from '../../shared/settings';
 
 type State = { status: 'loading' } | { status: 'ok'; profile: PageProfile } | { status: 'unavailable' };
 
@@ -35,6 +36,27 @@ export function Popup() {
         <div className="px-3 py-4 text-[11px] text-muted">Archify isn't active on this page.</div>
       )}
       {state.status === 'ok' && <Profile profile={state.profile} />}
+
+      <HoverToggle />
+    </div>
+  );
+}
+
+function HoverToggle() {
+  const [on, setOn] = useState<boolean | null>(null);
+  useEffect(() => { getHoverEnabled().then(setOn); }, []);
+  if (on === null) return null;
+  return (
+    <div className="flex items-center justify-between border-t border-ink/80 px-3 py-2 text-[10px]">
+      <span className="text-muted">
+        Hover inspector <span className="text-muted/60">· Ctrl+Shift+H</span>
+      </span>
+      <button
+        onClick={() => { const next = !on; setOn(next); void setHoverEnabled(next); }}
+        className={`border px-2 py-0.5 tracking-wide ${on ? 'border-ink bg-ink text-paper' : 'border-line text-muted'}`}
+      >
+        {on ? '● ON' : '○ OFF'}
+      </button>
     </div>
   );
 }
