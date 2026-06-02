@@ -29,3 +29,6 @@ Thumbs.db
 site/node_modules/
 site/dist/
 site/.astro/
+site/test-results/
+site/playwright-report/
+site/playwright/.cache/
