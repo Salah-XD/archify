@@ -2,15 +2,13 @@ import type { ReactNode } from 'react';
 import { detectFramework } from '../engine/framework';
 import { detectComponentType } from '../engine/componentType';
 import { detectLibrary } from '../engine/library';
-import type { SignalStore } from '../content/signalStore';
 import type { HoverPayload } from '../shared/protocol';
 import { Confidence } from './Confidence';
 
-export function ArchitectureTab({ hover, store }: { hover: HoverPayload; store: SignalStore }) {
+export function ArchitectureTab({ hover }: { hover: HoverPayload }) {
   const fw = detectFramework(hover.framework);
   const type = detectComponentType(hover.dom);
   const lib = detectLibrary(hover.dom);
-  const recent = store.security().network.slice(-3).reverse();
 
   return (
     <div>
@@ -36,33 +34,8 @@ export function ArchitectureTab({ hover, store }: { hover: HoverPayload; store: 
           ~ {lib.hint.library}? {lib.hint.confidence}% — {lib.hint.note}
         </div>
       )}
-
-      <div className="mt-2 border-t border-line pt-1.5">
-        <div className="mb-1 text-[9px] tracking-[0.2em] text-muted">TRIGGERED API</div>
-        {recent.length === 0 ? (
-          <div className="text-[10px] text-muted/70">— none observed yet —</div>
-        ) : (
-          recent.map((n, i) => (
-            <div key={i} className="flex items-center gap-1.5 text-[10px] leading-relaxed">
-              <span className="w-9 shrink-0 font-semibold text-redline">{n.method}</span>
-              <span className="truncate text-ink">{pathOf(n.url)}</span>
-              <span className="ml-auto shrink-0 tabular-nums text-muted">
-                {n.status ?? '—'}·{n.latencyMs ?? '?'}ms
-              </span>
-            </div>
-          ))
-        )}
-      </div>
     </div>
   );
-}
-
-function pathOf(url: string): string {
-  try {
-    return new URL(url, location.href).pathname;
-  } catch {
-    return url;
-  }
 }
 
 function Row({ label, value, unknown, children }: { label: string; value: string; unknown?: boolean; children?: ReactNode }) {

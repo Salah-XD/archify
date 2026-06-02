@@ -2,6 +2,7 @@ import { createRoot, type Root } from 'react-dom/client';
 import { createElement } from 'react';
 import { Overlay } from '../ui/Overlay';
 import type { SignalStore } from './signalStore';
+import type { FlowStore } from './flowStore';
 import type { HoverPayload } from '../shared/protocol';
 import { getHoverEnabled, setHoverEnabled, onHoverEnabledChange } from '../shared/settings';
 import css from '../app.css?inline';
@@ -14,7 +15,7 @@ const HOST_ID = 'archify-overlay-host';
 const PANEL_W = 320;
 const PANEL_H = 260;
 
-export function mountOverlay(store: SignalStore): OverlayController {
+export function mountOverlay(store: SignalStore, flow: FlowStore): OverlayController {
   const host = document.createElement('div');
   host.id = HOST_ID;
   host.style.cssText = 'position:fixed;z-index:2147483647;top:0;left:0;pointer-events:none;';
@@ -47,6 +48,7 @@ export function mountOverlay(store: SignalStore): OverlayController {
       createElement(Overlay, {
         hover: latest,
         store,
+        flow: flow.latest(),
         locked,
         // ✕ turns the inspector OFF (persisted) until the popup toggle / shortcut turns it back on.
         onClose: () => { enabled = false; latest = null; paint(); void setHoverEnabled(false); },

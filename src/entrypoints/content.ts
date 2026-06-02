@@ -14,7 +14,7 @@ export default defineContentScript({
 
     const store = new SignalStore(location.hostname);
     const flow = new FlowStore();
-    const overlay = mountOverlay(store);
+    const overlay = mountOverlay(store, flow);
     let pageGlobals: string[] = [];
     let hostHeaders: Record<string, string> = {};
 
