@@ -1,41 +1,42 @@
 ---
 import Base from '../layouts/Base.astro';
+import Navbar from '../components/Navbar.astro';
 import Hero from '../components/Hero.astro';
+import Problem from '../components/Problem.astro';
 import LiveDemo from '../components/LiveDemo.svelte';
-import FeatureCard from '../components/FeatureCard.astro';
+import HowItWorks from '../components/HowItWorks.astro';
+import Compare from '../components/Compare.astro';
+import SectionHeader from '../components/SectionHeader.astro';
 import DetectPanel from '../components/DetectPanel.astro';
+import Personas from '../components/Personas.astro';
+import SecuritySection from '../components/SecuritySection.astro';
+import Faq from '../components/Faq.astro';
 import GlasswatchCTA from '../components/GlasswatchCTA.astro';
 import Footer from '../components/Footer.astro';
 ---
 <Base>
+  <Navbar />
   <Hero />
-  <LiveDemo client:visible />
+  <Problem />
+  <LiveDemo client:load />
+  <HowItWorks />
+  <Compare />
 
-  <section class="mx-auto max-w-5xl px-6 py-16">
-    <div class="mb-6 flex items-center gap-2">
-      <span class="h-1 w-1 bg-redline"></span>
-      <span class="text-[10px] font-semibold tracking-[0.28em] text-ink">WHAT IT DOES</span>
-      <span class="h-px flex-1 bg-line"></span>
-    </div>
-    <div class="grid gap-4 md:grid-cols-3">
-      <FeatureCard label="ARCHITECTURE" title="See the system, not the markup"
-        body="Hover any element for its framework, component, library, and the APIs it triggers." />
-      <FeatureCard label="SECURITY" title="See what touches your data"
-        body="Third-party scripts, outbound calls, and which scripts can read payment fields." />
-      <FeatureCard label="LOCAL-FIRST" title="Nothing leaves your browser"
-        body="100% local analysis. No accounts, no servers, no telemetry. Open source." />
+  <section class="mx-auto max-w-5xl px-6 py-20">
+    <SectionHeader title="WHAT IT DETECTS" />
+    <div class="grid items-center gap-8 md:grid-cols-[1fr_auto]">
+      <p class="max-w-md text-sm leading-relaxed text-ink-2">
+        Click the toolbar icon for a whole-page profile: the stack it's built on, where it's
+        hosted, and how exposed it is — assembled from runtime signals, with evidence behind
+        every detection.
+      </p>
+      <DetectPanel />
     </div>
   </section>
 
-  <section class="mx-auto max-w-5xl px-6 py-16">
-    <div class="mb-6 flex items-center gap-2">
-      <span class="h-1 w-1 bg-redline"></span>
-      <span class="text-[10px] font-semibold tracking-[0.28em] text-ink">WHAT IT DETECTS</span>
-      <span class="h-px flex-1 bg-line"></span>
-    </div>
-    <DetectPanel />
-  </section>
-
+  <Personas />
+  <SecuritySection />
+  <Faq />
   <GlasswatchCTA />
   <Footer />
 </Base>

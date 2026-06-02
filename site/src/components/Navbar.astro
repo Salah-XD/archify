@@ -1,0 +1,31 @@
+---
+import { GITHUB_URL, WEBSTORE_URL } from '../consts';
+const published = WEBSTORE_URL !== '#';
+const links = [
+  { href: '#problem', label: 'Problem' },
+  { href: '#how', label: 'How it works' },
+  { href: '#compare', label: 'vs DevTools' },
+  { href: '#security', label: 'Security' },
+];
+---
+<header class="sticky top-0 z-50 border-b border-line bg-paper/90 backdrop-blur-sm">
+  <nav class="mx-auto flex max-w-5xl items-center gap-6 px-6 py-3">
+    <a href="#top" class="flex items-center gap-2">
+      <span class="h-1.5 w-1.5 bg-redline"></span>
+      <span class="text-[12px] font-semibold tracking-[0.3em]">ARCHIFY</span>
+    </a>
+    <div class="hidden items-center gap-5 md:flex">
+      {links.map((l) => (
+        <a href={l.href} class="text-[11px] tracking-wide text-muted hover:text-ink">{l.label}</a>
+      ))}
+    </div>
+    <div class="ml-auto flex items-center gap-3">
+      <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+         class="hidden text-[11px] tracking-wide text-muted hover:text-ink sm:inline">GitHub</a>
+      <a href={WEBSTORE_URL} aria-disabled={!published}
+         class="border border-ink bg-ink px-3 py-1.5 text-[11px] font-semibold text-paper hover:bg-redline hover:border-redline aria-disabled:opacity-80">
+        {published ? 'Add to Chrome' : 'Coming soon'}
+      </a>
+    </div>
+  </nav>
+</header>
