@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <body>
+    <button id="probe">Sign in</button>
+    <script>
+      // Simulate what React writes into the page's MAIN world: a devtools hook +
+      // a fiber expando chain on the host node (host <button> -> <LoginButton/>).
+      // The whole point of the v1.1 fix is that the injected MAIN-world script can
+      // read these, while the isolated content script never could.
+      window.__REACT_DEVTOOLS_GLOBAL_HOOK__ = {};
+      var el = document.getElementById('probe');
+      function LoginButton() {}
+      el['__reactFiber$test'] = { type: 'button', return: { type: LoginButton, return: null } };
+    </script>
+  </body>
+</html>

@@ -1,18 +1,19 @@
 /**
- * E2E smoke test: loads the built Archify extension into Chromium, serves a
- * fixture page over HTTP (content scripts don't run on file:// by default),
- * hovers over an element, and verifies both overlay tab labels render.
+ * E2E: loads the built Archify extension into Chromium, serves a fixture page
+ * over HTTP (content scripts don't run on file:// by default), hovers an
+ * element, and reads the Shadow-DOM overlay.
+ *
+ * The second test is the important one: it proves the v1.1 world-isolation fix —
+ * the injected MAIN-world script reads a React fiber expando that the isolated
+ * content script could never see, and the overlay reports "React" + the
+ * component name. The original test suite never exercised this path.
  */
 
 import { test, expect } from '@playwright/test';
-import { chromium } from '@playwright/test';
+import { chromium, type BrowserContext } from '@playwright/test';
 import * as http from 'http';
 import * as path from 'path';
 import * as fs from 'fs';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
 
 function startFixtureServer(htmlPath: string): Promise<{ server: http.Server; url: string }> {
   const html = fs.readFileSync(htmlPath, 'utf-8');
@@ -28,83 +29,86 @@ function startFixtureServer(htmlPath: string): Promise<{ server: http.Server; ur
     });
     server.listen(0, '127.0.0.1', () => {
       const addr = server.address();
-      if (!addr || typeof addr === 'string') {
-        reject(new Error('Could not determine server address'));
-        return;
-      }
+      if (!addr || typeof addr === 'string') return reject(new Error('no server address'));
       resolve({ server, url: `http://127.0.0.1:${addr.port}/` });
     });
     server.on('error', reject);
   });
 }
 
-// ---------------------------------------------------------------------------
-// Test
-// ---------------------------------------------------------------------------
-
-test('overlay renders Architecture and Security tabs on hover', async () => {
-  // --- 1. Locate built extension ---
+function extensionDir(): string {
   const extDir = path.resolve(__dirname, '../../.output/chrome-mv3');
   if (!fs.existsSync(extDir)) {
-    throw new Error(
-      `Built extension not found at ${extDir}.\nRun "npx wxt build" first, then re-run this test.`
-    );
+    throw new Error(`Built extension not found at ${extDir}. Run "npx wxt build" first.`);
   }
+  return extDir;
+}
 
-  // --- 2. Start local HTTP server for the fixture page ---
-  const fixtureHtml = path.resolve(__dirname, 'fixture-app.html');
-  const { server, url } = await startFixtureServer(fixtureHtml);
+async function launchWithExtension(extDir: string): Promise<BrowserContext> {
+  // MV3 extensions require non-old-headless; headless:false works on desktops.
+  return chromium.launchPersistentContext('', {
+    headless: false,
+    args: [
+      `--disable-extensions-except=${extDir}`,
+      `--load-extension=${extDir}`,
+      '--no-sandbox',
+      '--disable-dev-shm-usage',
+    ],
+  });
+}
 
-  let context;
+const HOST = '#archify-overlay-host';
+
+test('overlay renders the ARCH and SEC tabs on hover', async () => {
+  const extDir = extensionDir();
+  const { server, url } = await startFixtureServer(path.resolve(__dirname, 'fixture-app.html'));
+  let context: BrowserContext | undefined;
   try {
-    // --- 3. Launch Chromium with the extension loaded ---
-    // MV3 requires non-old-headless; try headless=false first (works on desktops).
-    // In sandbox environments without a display this will throw — see Step 5 notes.
-    context = await chromium.launchPersistentContext('', {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${extDir}`,
-        `--load-extension=${extDir}`,
-        '--no-sandbox',
-        '--disable-dev-shm-usage',
-      ],
-    });
-
-    const page = context.pages()[0] ?? await context.newPage();
-
-    // --- 4. Navigate to fixture page over HTTP ---
+    context = await launchWithExtension(extDir);
+    const page = context.pages()[0] ?? (await context.newPage());
     await page.goto(url, { waitUntil: 'domcontentloaded' });
-
-    // --- 5. Wait for the overlay host div to be injected by the content script ---
-    // The host has `z-index:2147483647` in its inline style.
-    // Use state:'attached' because the host is position:fixed with pointer-events:none
-    // (zero painted area) and Playwright's default 'visible' check rejects it.
-    await page.waitForSelector('div[style*="2147483647"]', { state: 'attached', timeout: 10000 });
-
-    // --- 6. Hover over the login button to trigger overlay render ---
+    await page.waitForSelector(HOST, { state: 'attached', timeout: 10000 });
     await page.hover('#login');
-
-    // --- 7. Wait until the shadow root contains both tab labels ---
     await page.waitForFunction(
-      () => {
-        const host = document.querySelector('div[style*="2147483647"]');
-        const txt = host?.shadowRoot?.textContent ?? '';
-        return txt.includes('Architecture') && txt.includes('Security');
+      (sel) => {
+        const t = document.querySelector(sel)?.shadowRoot?.textContent ?? '';
+        return t.includes('ARCHIFY') && t.includes('ARCH') && t.includes('SEC');
       },
-      { timeout: 10000 }
+      HOST,
+      { timeout: 10000 },
     );
-
-    // --- 8. Assert (redundant with waitForFunction, but explicit for readability) ---
-    const shadowText = await page.evaluate(() => {
-      const host = document.querySelector('div[style*="2147483647"]');
-      return host?.shadowRoot?.textContent ?? '';
-    });
-
-    expect(shadowText).toContain('Architecture');
-    expect(shadowText).toContain('Security');
-
   } finally {
     if (context) await context.close();
-    await new Promise<void>((resolve) => server.close(() => resolve()));
+    await new Promise<void>((r) => server.close(() => r()));
+  }
+});
+
+test('detects React + the component name across the MAIN/isolated world boundary', async () => {
+  const extDir = extensionDir();
+  const { server, url } = await startFixtureServer(path.resolve(__dirname, 'react-app.html'));
+  let context: BrowserContext | undefined;
+  try {
+    context = await launchWithExtension(extDir);
+    const page = context.pages()[0] ?? (await context.newPage());
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector(HOST, { state: 'attached', timeout: 10000 });
+    await page.hover('#probe');
+    await page.waitForFunction(
+      (sel) => {
+        const t = document.querySelector(sel)?.shadowRoot?.textContent ?? '';
+        return t.includes('React') && t.includes('LoginButton');
+      },
+      HOST,
+      { timeout: 10000 },
+    );
+    const text = await page.evaluate(
+      (sel) => document.querySelector(sel)?.shadowRoot?.textContent ?? '',
+      HOST,
+    );
+    expect(text).toContain('React');
+    expect(text).toContain('LoginButton');
+  } finally {
+    if (context) await context.close();
+    await new Promise<void>((r) => server.close(() => r()));
   }
 });
