@@ -1,0 +1,16 @@
+<!doctype html>
+<html>
+  <body>
+    <button id="login">Log in</button>
+    <div id="result"></div>
+    <script>
+      // A page-load fetch with NO interaction — must NOT appear in any flow.
+      fetch('/api/bootstrap').catch(() => {});
+      document.getElementById('login').addEventListener('click', async () => {
+        await fetch('/api/login', { method: 'POST' }).catch(() => {});
+        localStorage.setItem('token', 'demo');
+        history.pushState({}, '', '/dashboard');
+      });
+    </script>
+  </body>
+</html>

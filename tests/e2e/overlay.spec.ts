@@ -112,3 +112,62 @@ test('detects React + the component name across the MAIN/isolated world boundary
     await new Promise<void>((r) => server.close(() => r()));
   }
 });
+
+test('FLOW tab shows API + storage + nav for a click interaction but NOT page-load fetches', async () => {
+  const extDir = extensionDir();
+  const { server, url } = await startFixtureServer(path.resolve(__dirname, 'flow-app.html'));
+  let context: BrowserContext | undefined;
+  try {
+    context = await launchWithExtension(extDir);
+    const page = context.pages()[0] ?? (await context.newPage());
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector(HOST, { state: 'attached', timeout: 10000 });
+
+    // Hover first so the overlay has a `latest` payload and will render.
+    await page.hover('#login');
+    // Wait for the overlay to become visible (hover triggers paint).
+    await page.waitForFunction(
+      (sel) => {
+        const h = document.querySelector(sel) as HTMLElement | null;
+        return h?.style.display !== 'none';
+      },
+      HOST,
+      { timeout: 10000 },
+    );
+
+    // Click the button — fires the real async handler (fetch POST + localStorage + pushState)
+    // AND locks the Archify overlay on this element.
+    await page.click('#login');
+
+    // Wait for the async handler to complete: pushState changes pathname to /dashboard.
+    await page.waitForFunction(() => location.pathname === '/dashboard', undefined, { timeout: 10000 });
+
+    // Switch the overlay to the FLOW tab.
+    await page.evaluate(() => {
+      const host = document.querySelector('#archify-overlay-host');
+      const btn = [...(host?.shadowRoot?.querySelectorAll('button') ?? [])].find((b) =>
+        b.textContent?.includes('FLOW'),
+      );
+      (btn as HTMLButtonElement | undefined)?.click();
+    });
+
+    // Assert the FLOW tab shows the API call, storage write, and navigation.
+    await page.waitForFunction(
+      () => {
+        const t = document.querySelector('#archify-overlay-host')?.shadowRoot?.textContent ?? '';
+        return t.includes('/api/login') && t.includes('sets a token') && t.includes('/dashboard');
+      },
+      undefined,
+      { timeout: 10000 },
+    );
+
+    // Assert the page-load fetch (no interaction) is NOT attributed to this flow.
+    const text = await page.evaluate(
+      () => document.querySelector('#archify-overlay-host')?.shadowRoot?.textContent ?? '',
+    );
+    expect(text).not.toContain('/api/bootstrap');
+  } finally {
+    if (context) await context.close();
+    await new Promise<void>((r) => server.close(() => r()));
+  }
+});

@@ -2,19 +2,22 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { SignalStore } from '../content/signalStore';
 import type { HoverPayload } from '../shared/protocol';
+import type { InteractionFlow } from '../engine/types';
 import { ArchitectureTab } from './ArchitectureTab';
 import { SecurityTab } from './SecurityTab';
+import { FlowTab } from './FlowTab';
 
 export interface OverlayProps {
   hover: HoverPayload;
   store: SignalStore;
+  flow: InteractionFlow | null;
   locked: boolean;
   onClose: () => void;
   onToggleLock: () => void;
 }
 
-export function Overlay({ hover, store, locked, onClose, onToggleLock }: OverlayProps) {
-  const [tab, setTab] = useState<'arch' | 'sec'>('arch');
+export function Overlay({ hover, store, flow, locked, onClose, onToggleLock }: OverlayProps) {
+  const [tab, setTab] = useState<'arch' | 'sec' | 'flow'>('arch');
   return (
     <div className="relative w-[320px] bg-paper font-mono text-ink border border-ink/80 shadow-[5px_6px_0_-1px_rgba(24,22,15,0.13)]">
       <CornerTicks />
@@ -27,6 +30,7 @@ export function Overlay({ hover, store, locked, onClose, onToggleLock }: Overlay
         <div className="ml-auto flex">
           <TabButton active={tab === 'arch'} onClick={() => setTab('arch')}>ARCH</TabButton>
           <TabButton active={tab === 'sec'} onClick={() => setTab('sec')}>SEC</TabButton>
+          <TabButton active={tab === 'flow'} onClick={() => setTab('flow')}>FLOW</TabButton>
           <button
             onClick={onClose}
             aria-label="Close"
@@ -38,7 +42,9 @@ export function Overlay({ hover, store, locked, onClose, onToggleLock }: Overlay
       </header>
 
       <div className="px-3 py-2.5 text-[12px]">
-        {tab === 'arch' ? <ArchitectureTab hover={hover} store={store} /> : <SecurityTab store={store} />}
+        {tab === 'arch' && <ArchitectureTab hover={hover} />}
+        {tab === 'sec' && <SecurityTab store={store} />}
+        {tab === 'flow' && <FlowTab flow={flow} />}
       </div>
 
       <footer className="flex items-center justify-between border-t border-line px-2.5 py-1.5 text-[9px] tracking-wide text-muted">

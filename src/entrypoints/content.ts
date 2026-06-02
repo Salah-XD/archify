@@ -1,5 +1,6 @@
 import { CHANNEL_ATTR, channelName, isInjectedMessage } from '../shared/protocol';
 import { SignalStore } from '../content/signalStore';
+import { FlowStore } from '../content/flowStore';
 import { mountOverlay } from '../content/overlay';
 import { assembleProfile, rollupSecurity } from '../content/profile';
 
@@ -12,7 +13,8 @@ export default defineContentScript({
     await injectScript('/injected.js', { keepInDom: true });
 
     const store = new SignalStore(location.hostname);
-    const overlay = mountOverlay(store);
+    const flow = new FlowStore();
+    const overlay = mountOverlay(store, flow);
     let pageGlobals: string[] = [];
     let hostHeaders: Record<string, string> = {};
 
@@ -22,15 +24,21 @@ export default defineContentScript({
     document.addEventListener(channelName(nonce), (e) => {
       const m = (e as CustomEvent).detail;
       if (!isInjectedMessage(m)) return;
-      if (m.kind === 'network') store.addNetwork(m.payload);
+      if (m.kind === 'network') { store.addNetwork(m.payload); flow.addApi(m.payload); overlay.refreshFlow(); }
       else if (m.kind === 'script') store.addScript(m.payload);
       else if (m.kind === 'inputAccess') store.addInputAccess(m.payload);
       else if (m.kind === 'hover') overlay.onHover(m.payload);
       else if (m.kind === 'pageGlobals') pageGlobals = [...new Set([...pageGlobals, ...m.payload.globals])];
+      else if (m.kind === 'interaction') flow.openInteraction(m.payload);
+      else if (m.kind === 'storage') { flow.addStorage(m.payload); overlay.refreshFlow(); }
+      else if (m.kind === 'nav') { flow.addNav(m.payload); overlay.refreshFlow(); }
     });
 
     ctx.addEventListener(window, 'wxt:locationchange', () => {
       store.reset(); // network/script signals are per-route
+      // Do NOT reset the flow here — a SPA nav may be the final step of the current
+      // interaction flow, and clearing it would erase the data before the overlay can
+      // display it. The flow resets automatically when the next interaction opens.
       // Do NOT clear pageGlobals — window globals (framework/analytics) persist across SPA routes.
       fetchHostHeaders().then((h) => { hostHeaders = h; }); // refresh: SPA route may have different headers
     });
