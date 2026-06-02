@@ -32,9 +32,12 @@ export default defineContentScript({
     ctx.addEventListener(window, 'wxt:locationchange', () => {
       store.reset();
       pageGlobals = [];
+      fetchHostHeaders().then((h) => { hostHeaders = h; }); // refresh: SPA route may have different headers
     });
 
     // Popup asks for the whole-page profile.
+    // NOTE: keep this the ONLY runtime.onMessage listener in the content script —
+    // the webextension-polyfill resolves the first listener that returns a Promise.
     browser.runtime.onMessage.addListener((msg: unknown) => {
       if (!msg || (msg as { type?: string }).type !== 'archify:getProfile') return;
       const sec = store.security();
