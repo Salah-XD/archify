@@ -1,12 +1,17 @@
 import { describe, it, expect } from 'vitest';
-import { ARCHIFY_SOURCE, isArchifyMessage } from '../src/shared/protocol';
+import { channelName, isInjectedMessage } from '../src/shared/protocol';
 
 describe('protocol', () => {
-  it('recognises tagged messages', () => {
-    expect(isArchifyMessage({ source: ARCHIFY_SOURCE, kind: 'network', payload: {} })).toBe(true);
+  it('channelName namespaces the nonce', () => {
+    expect(channelName('abc123')).toBe('archify:abc123');
   });
-  it('rejects foreign messages', () => {
-    expect(isArchifyMessage({ source: 'other', kind: 'network' })).toBe(false);
-    expect(isArchifyMessage(null)).toBe(false);
+  it('isInjectedMessage accepts kinded objects', () => {
+    expect(isInjectedMessage({ kind: 'network', payload: {} })).toBe(true);
+    expect(isInjectedMessage({ kind: 'hover', payload: {} })).toBe(true);
+  });
+  it('isInjectedMessage rejects junk', () => {
+    expect(isInjectedMessage(null)).toBe(false);
+    expect(isInjectedMessage({})).toBe(false);
+    expect(isInjectedMessage('x')).toBe(false);
   });
 });

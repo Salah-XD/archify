@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from 'vitest';
-import { collectDomSignals } from '../src/content/collect';
+import { collectDomSignals } from '../src/shared/collectDom';
 
 describe('collectDomSignals', () => {
   it('extracts tag, role, data-* and classes', () => {
