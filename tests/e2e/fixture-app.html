@@ -1,0 +1,8 @@
+<!doctype html><html><body>
+<button id="login" role="button">Log in</button>
+<input id="pw" type="password" />
+<script>
+  document.getElementById('pw').addEventListener('input', () => {});
+  document.getElementById('login').addEventListener('click', () => fetch('/api/login', { method: 'POST' }).catch(() => {}));
+</script>
+</body></html>
