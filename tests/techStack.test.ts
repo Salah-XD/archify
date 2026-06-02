@@ -30,4 +30,10 @@ describe('detectTechnologies', () => {
     expect(GLOBAL_PROBES).toContain('Stripe');
     expect(new Set(GLOBAL_PROBES).size).toBe(GLOBAL_PROBES.length);
   });
+  it('does not flag GA from the overly-broad "ga" global alone (false-positive guard)', () => {
+    expect(names({ ...base, globals: ['ga'] })).not.toContain('Google Analytics');
+  });
+  it('does not flag Clerk auth from clerk.io, a different company (false-positive guard)', () => {
+    expect(names({ ...base, scriptSrcs: ['https://cdn.clerk.io/widget.js'] })).not.toContain('Clerk');
+  });
 });

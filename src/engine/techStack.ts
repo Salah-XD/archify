@@ -21,21 +21,21 @@ export const TECH_FINGERPRINTS: Fingerprint[] = [
   { name: 'Remix', category: 'framework', confidence: 88, globals: ['__remixContext'] },
   { name: 'Astro', category: 'framework', confidence: 80, generator: /Astro/i },
   // analytics
-  { name: 'Google Analytics', category: 'analytics', confidence: 92, globals: ['gtag', 'ga', 'dataLayer'], scriptSrcs: ['google-analytics.com', 'googletagmanager.com/gtag'] },
+  { name: 'Google Analytics', category: 'analytics', confidence: 92, globals: ['gtag', 'dataLayer'], scriptSrcs: ['google-analytics.com', 'googletagmanager.com/gtag'] },
   { name: 'Segment', category: 'analytics', confidence: 88, scriptSrcs: ['cdn.segment.com'] },
   { name: 'Mixpanel', category: 'analytics', confidence: 88, globals: ['mixpanel'], scriptSrcs: ['cdn.mxpnl.com'] },
   { name: 'Amplitude', category: 'analytics', confidence: 88, globals: ['amplitude'], scriptSrcs: ['amplitude.com'] },
   { name: 'PostHog', category: 'analytics', confidence: 88, globals: ['posthog'], scriptSrcs: ['posthog.com'] },
   { name: 'Plausible', category: 'analytics', confidence: 85, scriptSrcs: ['plausible.io'] },
   { name: 'Fathom', category: 'analytics', confidence: 85, scriptSrcs: ['usefathom.com'] },
-  { name: 'Hotjar', category: 'analytics', confidence: 85, globals: ['hj'], scriptSrcs: ['static.hotjar.com'] },
+  { name: 'Hotjar', category: 'analytics', confidence: 85, scriptSrcs: ['static.hotjar.com'] },
   // tag manager
   { name: 'Google Tag Manager', category: 'tagmanager', confidence: 90, globals: ['google_tag_manager'], scriptSrcs: ['googletagmanager.com/gtm'] },
   { name: 'Tealium', category: 'tagmanager', confidence: 85, globals: ['utag'], scriptSrcs: ['tags.tiqcdn.com'] },
   // monitoring
   { name: 'Sentry', category: 'monitoring', confidence: 88, globals: ['__SENTRY__'], scriptSrcs: ['browser.sentry-cdn.com'] },
-  { name: 'Datadog RUM', category: 'monitoring', confidence: 85, globals: ['DD_RUM'], scriptSrcs: ['datadoghq'] },
-  { name: 'LogRocket', category: 'monitoring', confidence: 85, globals: ['LogRocket'], scriptSrcs: ['cdn.logrocket'] },
+  { name: 'Datadog RUM', category: 'monitoring', confidence: 85, globals: ['DD_RUM'], scriptSrcs: ['datadoghq.com'] },
+  { name: 'LogRocket', category: 'monitoring', confidence: 85, globals: ['LogRocket'], scriptSrcs: ['cdn.logrocket.io'] },
   { name: 'Bugsnag', category: 'monitoring', confidence: 85, globals: ['Bugsnag'], scriptSrcs: ['d2wy8f7a9ursnm.cloudfront.net'] },
   // payments
   { name: 'Stripe', category: 'payments', confidence: 90, globals: ['Stripe'], scriptSrcs: ['js.stripe.com'] },
@@ -55,7 +55,7 @@ export const TECH_FINGERPRINTS: Fingerprint[] = [
   // auth
   { name: 'Firebase', category: 'auth', confidence: 85, globals: ['firebase'], scriptSrcs: ['firebaseio.com'] },
   { name: 'Auth0', category: 'auth', confidence: 85, globals: ['auth0'], scriptSrcs: ['cdn.auth0.com'] },
-  { name: 'Clerk', category: 'auth', confidence: 85, globals: ['Clerk'], scriptSrcs: ['clerk.'] },
+  { name: 'Clerk', category: 'auth', confidence: 85, globals: ['Clerk'], scriptSrcs: ['clerk.dev', 'clerk.com'] },
   // cdn / fonts
   { name: 'jsDelivr', category: 'cdn', confidence: 75, scriptSrcs: ['cdn.jsdelivr.net'] },
   { name: 'unpkg', category: 'cdn', confidence: 75, scriptSrcs: ['unpkg.com'] },
