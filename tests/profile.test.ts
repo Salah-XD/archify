@@ -36,3 +36,24 @@ describe('assembleProfile', () => {
     expect(p.security.totalScripts).toBe(3);
   });
 });
+
+describe('assembleProfile (realistic)', () => {
+  it('produces a believable profile for a Next.js + Stripe + GA site on Vercel behind Cloudflare', () => {
+    const p = assembleProfile({
+      url: 'https://acme.com/', host: 'acme.com',
+      signals: {
+        globals: ['__NEXT_DATA__', 'Stripe', 'dataLayer'],
+        scriptSrcs: ['https://acme.com/_next/static/x.js', 'https://js.stripe.com/v3'],
+        metaGenerator: null, cookieNames: [],
+      },
+      headers: { 'x-vercel-id': 'iad1::abc', 'cf-ray': '83x' },
+      assetOrigins: ['acme.com'],
+      security: { thirdPartyScripts: 2, totalScripts: 5, thirdPartyDomains: 3, sensitiveReaders: 1 },
+    });
+    const names = p.stack.map((d) => d.name);
+    expect(names).toEqual(expect.arrayContaining(['Next.js', 'Stripe', 'Google Analytics']));
+    expect(p.hosting.host).toBe('Vercel');
+    expect(p.hosting.cdn).toBe('Cloudflare');
+    expect(p.security.sensitiveReaders).toBe(1);
+  });
+});
