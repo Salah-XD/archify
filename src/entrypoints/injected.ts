@@ -1,6 +1,7 @@
 import { CHANNEL_ATTR, channelName, type InjectedMessage, type HoverPayload } from '../shared/protocol';
 import { collectDomSignals } from '../shared/collectDom';
 import { collectFrameworkSignals, reactComponentName } from '../shared/detectInPage';
+import { GLOBAL_PROBES } from '../engine/techStack';
 
 export default defineUnlistedScript(() => {
   // Read the one-time channel nonce the content script left for us, then erase it.
@@ -88,4 +89,12 @@ export default defineUnlistedScript(() => {
       post({ kind: 'hover', payload });
     });
   }, true);
+
+  // 6) Page-wide tech globals — probed in the MAIN world on load + a follow-up,
+  //    because analytics/payment scripts attach their globals after document_start.
+  const snapshotGlobals = () =>
+    post({ kind: 'pageGlobals', payload: { globals: GLOBAL_PROBES.filter((k) => k in window) } });
+  if (document.readyState === 'complete') snapshotGlobals();
+  else window.addEventListener('load', snapshotGlobals, { once: true });
+  setTimeout(snapshotGlobals, 2000);
 });

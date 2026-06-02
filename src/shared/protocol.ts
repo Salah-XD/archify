@@ -26,7 +26,8 @@ export type InjectedMessage =
   | { kind: 'network'; payload: RawNetwork }
   | { kind: 'script'; payload: RawScript }
   | { kind: 'inputAccess'; payload: RawInputAccess }
-  | { kind: 'hover'; payload: HoverPayload };
+  | { kind: 'hover'; payload: HoverPayload }
+  | { kind: 'pageGlobals'; payload: { globals: string[] } };
 
 export function isInjectedMessage(d: unknown): d is InjectedMessage {
   return !!d && typeof d === 'object' && typeof (d as { kind?: unknown }).kind === 'string';
