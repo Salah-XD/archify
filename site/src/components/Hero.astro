@@ -14,8 +14,8 @@ const published = WEBSTORE_URL !== '#';
       See components, APIs, libraries, and application behavior directly inside your browser. 100% local.
     </p>
     <div class="mt-7 flex flex-wrap gap-3">
-      <a href={WEBSTORE_URL}
-         class="border border-ink bg-ink px-4 py-2 text-[13px] font-semibold text-paper hover:bg-redline hover:border-redline">
+      <a href={WEBSTORE_URL} aria-disabled={!published}
+         class="border border-ink bg-ink px-4 py-2 text-[13px] font-semibold text-paper hover:bg-redline hover:border-redline aria-disabled:cursor-default aria-disabled:opacity-80">
         {published ? 'Add to Chrome' : 'Coming to the Chrome Web Store'}
       </a>
       <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
