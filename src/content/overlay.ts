@@ -9,6 +9,8 @@ import css from '../app.css?inline';
 
 export interface OverlayController {
   onHover(p: HoverPayload): void;
+  /** Re-paint the overlay with the latest flow data (call after each flow step). */
+  refreshFlow(): void;
 }
 
 const HOST_ID = 'archify-overlay-host';
@@ -87,6 +89,11 @@ export function mountOverlay(store: SignalStore, flow: FlowStore): OverlayContro
       hidden = false; // a fresh hover clears the soft-hide
       latest = p;
       paint();
+    },
+    refreshFlow() {
+      // Re-paint so the overlay picks up newly-added flow steps that arrived
+      // asynchronously after the interaction was opened (e.g. after an awaited fetch).
+      if (enabled && !hidden && latest) paint();
     },
   };
 }

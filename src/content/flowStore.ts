@@ -11,6 +11,9 @@ export class FlowStore {
   private latestFlow: InteractionFlow | null = null;
 
   openInteraction(p: { id: number; component: string | null; dom: DomSignals }) {
+    // Reset previous flow when a new interaction begins (not on locationchange, so a
+    // SPA nav that is PART of the current flow can still be read from the overlay).
+    this.latestFlow = null;
     this.open = { id: p.id, component: p.component, type: detectComponentType(p.dom).type, steps: [] };
     this.commit();
   }
