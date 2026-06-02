@@ -1,33 +1,77 @@
 import { useState } from 'react';
-import type { DomSignals, FrameworkSignals } from '../engine/types';
+import type { ReactNode } from 'react';
 import type { SignalStore } from '../content/signalStore';
+import type { HoverPayload } from '../shared/protocol';
 import { ArchitectureTab } from './ArchitectureTab';
 import { SecurityTab } from './SecurityTab';
 
 export interface OverlayProps {
-  dom: DomSignals;
-  framework: FrameworkSignals;
+  hover: HoverPayload;
   store: SignalStore;
-  partialCapture: boolean;
+  locked: boolean;
+  onClose: () => void;
+  onToggleLock: () => void;
 }
 
-export function Overlay({ dom, framework, store, partialCapture }: OverlayProps) {
+export function Overlay({ hover, store, locked, onClose, onToggleLock }: OverlayProps) {
   const [tab, setTab] = useState<'arch' | 'sec'>('arch');
   return (
-    <div className="w-80 rounded-lg bg-slate-900 text-slate-100 shadow-2xl ring-1 ring-slate-700 text-sm">
-      <div className="flex border-b border-slate-700">
-        <button className={`flex-1 px-3 py-2 ${tab === 'arch' ? 'bg-slate-800 text-blue-400' : ''}`}
-          onClick={() => setTab('arch')}>Architecture</button>
-        <button className={`flex-1 px-3 py-2 ${tab === 'sec' ? 'bg-slate-800 text-blue-400' : ''}`}
-          onClick={() => setTab('sec')}>Security</button>
+    <div className="relative w-[320px] bg-paper font-mono text-ink border border-ink/80 shadow-[5px_6px_0_-1px_rgba(24,22,15,0.13)]">
+      <CornerTicks />
+
+      <header className="flex items-stretch border-b border-ink/80">
+        <div className="flex items-center gap-2 px-2.5 py-2">
+          <span className="h-1.5 w-1.5 bg-redline" />
+          <span className="text-[10px] font-semibold tracking-[0.28em]">ARCHIFY</span>
+        </div>
+        <div className="ml-auto flex">
+          <TabButton active={tab === 'arch'} onClick={() => setTab('arch')}>ARCH</TabButton>
+          <TabButton active={tab === 'sec'} onClick={() => setTab('sec')}>SEC</TabButton>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="border-l border-ink/80 px-2.5 text-muted hover:bg-paper-2 hover:text-redline"
+          >
+            ✕
+          </button>
+        </div>
+      </header>
+
+      <div className="px-3 py-2.5 text-[12px]">
+        {tab === 'arch' ? <ArchitectureTab hover={hover} store={store} /> : <SecurityTab store={store} />}
       </div>
-      {partialCapture && (
-        <div className="px-3 py-1 text-xs text-amber-400 bg-amber-950/40">⚠ partial capture — interceptor attached late</div>
-      )}
-      <div className="p-3">
-        {tab === 'arch' ? <ArchitectureTab dom={dom} framework={framework} store={store} />
-                        : <SecurityTab store={store} />}
-      </div>
+
+      <footer className="flex items-center justify-between border-t border-line px-2.5 py-1.5 text-[9px] tracking-wide text-muted">
+        <button onClick={onToggleLock} className="hover:text-ink">
+          {locked ? '● LOCKED' : '○ click to lock'}
+        </button>
+        <span>ESC close · ⌥A toggle</span>
+      </footer>
     </div>
+  );
+}
+
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`border-l border-ink/80 px-3 text-[10px] tracking-[0.2em] ${
+        active ? 'bg-ink text-paper' : 'text-muted hover:bg-paper-2 hover:text-ink'
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function CornerTicks() {
+  const c = 'pointer-events-none absolute h-2 w-2 border-redline';
+  return (
+    <>
+      <span className={`${c} -left-px -top-px border-l border-t`} />
+      <span className={`${c} -right-px -top-px border-r border-t`} />
+      <span className={`${c} -bottom-px -left-px border-b border-l`} />
+      <span className={`${c} -bottom-px -right-px border-b border-r`} />
+    </>
   );
 }
