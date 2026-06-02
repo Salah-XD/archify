@@ -55,6 +55,7 @@ export default defineContentScript({
             scriptSrcs,
             metaGenerator: document.querySelector('meta[name="generator"]')?.getAttribute('content') ?? null,
             cookieNames: document.cookie.split(';').map((c) => c.split('=')[0].trim()).filter(Boolean),
+            domHints: document.querySelector('[class*="svelte-"]') ? ['svelte'] : [],
           },
           headers: hostHeaders,
           assetOrigins,

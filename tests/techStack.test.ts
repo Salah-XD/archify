@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import { detectTechnologies, GLOBAL_PROBES } from '../src/engine/techStack';
 import type { PageSignals } from '../src/engine/types';
 
-const base: PageSignals = { globals: [], scriptSrcs: [], metaGenerator: null, cookieNames: [] };
+const base: PageSignals = { globals: [], scriptSrcs: [], metaGenerator: null, cookieNames: [], domHints: [] };
 const names = (s: PageSignals) => detectTechnologies(s).map((d) => d.name);
 
 describe('detectTechnologies', () => {
@@ -35,5 +35,11 @@ describe('detectTechnologies', () => {
   });
   it('does not flag Clerk auth from clerk.io, a different company (false-positive guard)', () => {
     expect(names({ ...base, scriptSrcs: ['https://cdn.clerk.io/widget.js'] })).not.toContain('Clerk');
+  });
+  it('detects Svelte via a svelte- class DOM hint (no runtime global to probe)', () => {
+    expect(names({ ...base, domHints: ['svelte'] })).toContain('Svelte');
+  });
+  it('detects SvelteKit via the /_app/immutable/ asset path', () => {
+    expect(names({ ...base, scriptSrcs: ['https://x.com/_app/immutable/entry.js'] })).toContain('SvelteKit');
   });
 });

@@ -36,7 +36,7 @@ describe('assembleProfile', () => {
   it('composes stack + hosting + security into a PageProfile', () => {
     const p = assembleProfile({
       url: 'https://shop.example.com/', host: 'shop.example.com',
-      signals: { globals: ['Stripe'], scriptSrcs: ['https://js.stripe.com/v3'], metaGenerator: null, cookieNames: [] },
+      signals: { globals: ['Stripe'], scriptSrcs: ['https://js.stripe.com/v3'], metaGenerator: null, cookieNames: [], domHints: [] },
       headers: { 'x-vercel-id': 'iad::1' },
       assetOrigins: ['shop.example.com'],
       security: { thirdPartyScripts: 1, totalScripts: 3, thirdPartyDomains: 2, sensitiveReaders: 0 },
@@ -55,7 +55,7 @@ describe('assembleProfile (realistic)', () => {
       signals: {
         globals: ['__NEXT_DATA__', 'Stripe', 'dataLayer'],
         scriptSrcs: ['https://acme.com/_next/static/x.js', 'https://js.stripe.com/v3'],
-        metaGenerator: null, cookieNames: [],
+        metaGenerator: null, cookieNames: [], domHints: [],
       },
       headers: { 'x-vercel-id': 'iad1::abc', 'cf-ray': '83x' },
       assetOrigins: ['acme.com'],

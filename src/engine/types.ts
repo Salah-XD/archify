@@ -63,6 +63,7 @@ export interface PageSignals {
   scriptSrcs: string[];     // full <script> src URLs
   metaGenerator: string | null;
   cookieNames: string[];
+  domHints: string[];       // page-level DOM markers (e.g. 'svelte' for svelte-<hash> classes)
 }
 
 export interface TechDetection {

@@ -8,6 +8,7 @@ interface Fingerprint {
   scriptSrcs?: string[];   // substring match against a <script> src
   generator?: RegExp;      // matches the meta generator
   cookie?: string[];       // cookie name present
+  domHints?: string[];     // page-level DOM markers (e.g. 'svelte' for svelte-<hash> classes)
 }
 
 export const TECH_FINGERPRINTS: Fingerprint[] = [
@@ -22,6 +23,10 @@ export const TECH_FINGERPRINTS: Fingerprint[] = [
   { name: 'Gatsby', category: 'framework', confidence: 90, globals: ['___gatsby'] },
   { name: 'Remix', category: 'framework', confidence: 88, globals: ['__remixContext'] },
   { name: 'Astro', category: 'framework', confidence: 80, generator: /Astro/i },
+  // Svelte compiles its runtime away (no window global), so it's caught page-level via its
+  // svelte-<hash> classes (domHint) and SvelteKit via its /_app/immutable/ asset paths.
+  { name: 'SvelteKit', category: 'framework', confidence: 90, scriptSrcs: ['/_app/immutable/'] },
+  { name: 'Svelte', category: 'framework', confidence: 82, domHints: ['svelte'] },
   // analytics
   { name: 'Google Analytics', category: 'analytics', confidence: 92, globals: ['gtag', 'dataLayer'], scriptSrcs: ['google-analytics.com', 'googletagmanager.com/gtag'] },
   { name: 'Segment', category: 'analytics', confidence: 88, scriptSrcs: ['cdn.segment.com'] },
@@ -78,6 +83,10 @@ function match(fp: Fingerprint, s: PageSignals): string | null {
     }
   }
   if (fp.generator && s.metaGenerator && fp.generator.test(s.metaGenerator)) return 'meta generator';
+  if (fp.domHints) {
+    const d = fp.domHints.find((h) => s.domHints.includes(h));
+    if (d) return `dom ${d}`;
+  }
   if (fp.cookie) {
     const c = fp.cookie.find((name) => s.cookieNames.includes(name));
     if (c) return `cookie ${c}`;
