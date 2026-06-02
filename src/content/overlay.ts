@@ -17,15 +17,15 @@ export function mountOverlay(store: SignalStore, globals: Partial<FrameworkSigna
 
   const root: Root = createRoot(container);
   let locked = false;
-  const reachedDocStart = document.readyState === 'loading'; // injected likely won prerace
-  const partial = !reachedDocStart;
 
   function render(target: Element, x: number, y: number) {
     host.style.transform = `translate(${Math.min(x + 12, window.innerWidth - 340)}px, ${Math.min(y + 12, window.innerHeight - 260)}px)`;
     root.render(createElement(Overlay, {
       dom: collectDomSignals(target),
       framework: collectElementFrameworkSignals(target, globals),
-      store, partialCapture: partial,
+      // Honest readiness signal: the injected MAIN-world script posts its `globals`
+      // ack once installed. Until that arrives, `globals` is empty → capture is partial.
+      store, partialCapture: Object.keys(globals).length === 0,
     }));
   }
 

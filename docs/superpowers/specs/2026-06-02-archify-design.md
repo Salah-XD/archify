@@ -37,7 +37,7 @@ Architecture alone is a leaky funnel to a security product (audience mismatch). 
 
 ## 3. Non-goals (explicitly deferred, not v1)
 
-AI / Explain Mode · click→request causal correlation · architecture graph · exports · user accounts · component fingerprint database · any backend or cloud service · Firefox/Safari builds.
+AI / Explain Mode · click→request causal correlation · architecture graph · exports · user accounts · component fingerprint database · any backend or cloud service · Firefox/Safari builds · **WebSocket interception** (v1 intercepts `fetch`/`XHR` only; a constructor patch that reliably preserves `instanceof`/static constants without breaking WS-heavy apps is deferred to v2).
 
 ---
 
