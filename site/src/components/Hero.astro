@@ -1,0 +1,28 @@
+---
+import FlowSchematic from './FlowSchematic.svelte';
+import { GITHUB_URL, WEBSTORE_URL } from '../consts';
+const published = WEBSTORE_URL !== '#';
+---
+<section id="top" class="mx-auto grid max-w-5xl items-center gap-12 px-6 py-20 md:grid-cols-[1.05fr_1fr] md:py-28">
+  <div>
+    <div class="mb-5 flex items-center gap-2">
+      <span class="h-1.5 w-1.5 bg-redline"></span>
+      <span class="text-[11px] font-semibold tracking-[0.3em] text-muted">ARCHITECTURE INTELLIGENCE</span>
+    </div>
+    <h1 class="text-4xl font-semibold leading-[1.04] tracking-tight md:text-6xl">Understand<br />Software.</h1>
+    <p class="mt-5 max-w-md text-sm leading-relaxed text-ink-2">
+      Modern apps are harder to understand than ever. Archify reveals the components, APIs,
+      and behavior behind any web page — directly in your browser. 100% local.
+    </p>
+    <div class="mt-8 flex flex-wrap items-center gap-3">
+      <a href={WEBSTORE_URL} aria-disabled={!published}
+         class="border border-ink bg-ink px-5 py-2.5 text-[13px] font-semibold text-paper hover:bg-redline hover:border-redline aria-disabled:opacity-80">
+        {published ? 'Add to Chrome' : 'Coming to the Chrome Web Store'}
+      </a>
+      <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+         class="border border-ink px-5 py-2.5 text-[13px] font-semibold hover:bg-paper-2">View on GitHub</a>
+    </div>
+    <p class="mt-4 text-[11px] text-muted">Free · Open source · No account · Nothing leaves your browser</p>
+  </div>
+  <FlowSchematic client:load />
+</section>

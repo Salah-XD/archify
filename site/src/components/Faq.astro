@@ -1,0 +1,24 @@
+---
+import SectionHeader from './SectionHeader.astro';
+const faqs = [
+  { q: 'Is it free?', a: 'Yes — Archify is free and open source under Apache-2.0. No account, no paywall, no trial.' },
+  { q: 'Does my data leave the browser?', a: 'No. All analysis runs locally. There are no servers, no telemetry, and no analytics. Page contents are never stored or transmitted, and the per-tab analysis is destroyed when you navigate away.' },
+  { q: 'Which frameworks does it detect?', a: 'React, Next.js, Vue, Angular, Svelte and more. One honest caveat: exact component names are only available on development builds — on minified production code Archify shows the component type and a confidence score rather than fabricating a name.' },
+  { q: 'Does it work on any site?', a: 'Any web page you choose to inspect. It does not run on browser-internal pages (chrome://) or the extension store, by browser policy.' },
+  { q: 'Is it a DevTools replacement?', a: 'No. DevTools shows you the implementation. Archify shows you the architecture — the component, the API it calls, and what reads your data. They sit side by side.' },
+];
+---
+<section class="mx-auto max-w-3xl px-6 py-20">
+  <SectionHeader title="FAQ" />
+  <div class="divide-y divide-line border-y border-line">
+    {faqs.map((f) => (
+      <details class="group">
+        <summary class="flex cursor-pointer list-none items-center justify-between py-3.5 text-sm font-semibold marker:hidden">
+          {f.q}
+          <span class="text-redline transition-transform group-open:rotate-45">+</span>
+        </summary>
+        <p class="pb-4 pr-6 text-[12px] leading-relaxed text-ink-2">{f.a}</p>
+      </details>
+    ))}
+  </div>
+</section>

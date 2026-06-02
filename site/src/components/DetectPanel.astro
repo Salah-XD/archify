@@ -1,0 +1,29 @@
+---
+const rows = [
+  ['STACK', [['framework', 'Next.js'], ['payments', 'Stripe'], ['analytics', 'Google Analytics']]],
+  ['HOSTING', [['host', 'Vercel'], ['cdn', 'Cloudflare']]],
+  ['SECURITY', [['third-party scripts', '14 / 31'], ['reads card field', '1']]],
+] as const;
+---
+<div class="mx-auto max-w-sm border border-ink bg-paper">
+  <div class="flex items-center gap-2 border-b border-ink/80 px-3 py-2">
+    <span class="h-1.5 w-1.5 bg-redline"></span>
+    <span class="text-[10px] font-semibold tracking-[0.28em]">ARCHIFY · example.com</span>
+  </div>
+  <div class="space-y-3 p-3 text-[11px]">
+    {rows.map(([title, items]) => (
+      <div>
+        <div class="mb-1.5 flex items-center gap-2">
+          <span class="h-1 w-1 bg-redline"></span>
+          <span class="text-[9px] font-semibold tracking-[0.28em] text-ink">{title}</span>
+          <span class="h-px flex-1 bg-line"></span>
+        </div>
+        <div class="space-y-0.5 pl-3">
+          {items.map(([k, v]) => (
+            <div class="flex justify-between"><span class="text-muted">{k}</span><span class="text-ink">{v}</span></div>
+          ))}
+        </div>
+      </div>
+    ))}
+  </div>
+</div>

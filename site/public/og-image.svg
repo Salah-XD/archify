@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630" font-family="ui-monospace, 'JetBrains Mono', monospace">
+  <rect width="1200" height="630" fill="#f6f4ee"/>
+  <!-- corner registration ticks -->
+  <g fill="none" stroke="#df4f25" stroke-width="3">
+    <path d="M40 40 H72 M40 40 V72"/>
+    <path d="M1160 40 H1128 M1160 40 V72"/>
+    <path d="M40 590 H72 M40 590 V558"/>
+    <path d="M1160 590 H1128 M1160 590 V558"/>
+  </g>
+  <!-- schematic accent -->
+  <g fill="none" stroke="#18160f" stroke-opacity="0.18" stroke-width="2">
+    <path d="M760 200 H1080 M920 200 V330 M820 330 H1020 M920 330 V440 M820 440 H1020"/>
+  </g>
+  <circle cx="920" cy="330" r="6" fill="#df4f25"/>
+  <circle cx="920" cy="440" r="6" fill="#df4f25"/>
+  <!-- wordmark + tagline -->
+  <rect x="80" y="250" width="14" height="14" fill="#df4f25"/>
+  <text x="112" y="263" font-size="22" letter-spacing="10" font-weight="700" fill="#8c8675">ARCHITECTURE INTELLIGENCE</text>
+  <text x="78" y="360" font-size="92" font-weight="700" fill="#18160f">Understand Software.</text>
+  <text x="80" y="410" font-size="26" fill="#46412f">Components, APIs, libraries &amp; behavior — inside your browser.</text>
+  <text x="80" y="560" font-size="22" letter-spacing="8" font-weight="700" fill="#18160f">ARCHIFY</text>
+</svg>

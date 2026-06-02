@@ -1,0 +1,41 @@
+---
+import SectionHeader from './SectionHeader.astro';
+const before = ['Open DevTools', 'Read the DOM', 'Dig through Network', 'Search Sources & maps', 'Cross-check React DevTools', 'Read the docs', 'Ask a senior engineer'];
+---
+<section id="problem" class="mx-auto max-w-5xl px-6 py-20">
+  <SectionHeader title="THE PROBLEM" />
+  <div class="grid gap-10 md:grid-cols-[1fr_1fr]">
+    <div>
+      <h2 class="text-2xl font-semibold leading-tight tracking-tight md:text-3xl">
+        Software is becoming easier to build.<br />
+        <span class="text-muted">And harder to understand.</span>
+      </h2>
+      <p class="mt-4 max-w-md text-sm leading-relaxed text-ink-2">
+        AI made writing code cheap. The bottleneck moved. Today the hard part is understanding
+        an application you didn't write — and the tools for that haven't kept up.
+      </p>
+      <div class="mt-6 border-l-2 border-redline pl-4">
+        <div class="font-mono text-lg font-semibold">Understand a login flow</div>
+        <div class="mt-1 font-mono text-sm text-muted">
+          <span class="line-through">45 minutes</span>
+          <span class="px-2 text-redline">→</span>
+          <span class="text-ink">30 seconds</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="border border-ink/70 bg-paper-2/30 p-5">
+      <div class="mb-3 text-[9px] font-semibold tracking-[0.24em] text-muted">TO UNDERSTAND ONE PAGE TODAY</div>
+      <ol class="space-y-1.5">
+        {before.map((step, i) => (
+          <li class="flex items-center gap-2.5 font-mono text-[12px] text-ink-2">
+            <span class="w-4 text-right text-[10px] text-muted">{i + 1}</span>
+            <span class="h-px w-3 bg-line"></span>
+            <span>{step}</span>
+          </li>
+        ))}
+      </ol>
+      <div class="mt-3 border-t border-line pt-2 text-[11px] text-muted">…or just hover, with Archify.</div>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,30 @@
+---
+import SectionHeader from './SectionHeader.astro';
+const rows = [
+  { tool: 'Chrome DevTools', shows: 'implementation' },
+  { tool: 'Wappalyzer', shows: 'technologies' },
+  { tool: 'React DevTools', shows: 'components' },
+];
+---
+<section id="compare" class="mx-auto max-w-5xl px-6 py-20">
+  <SectionHeader title="VS THE REST" />
+  <div class="border border-ink/70">
+    {rows.map((r) => (
+      <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-line px-5 py-3.5 text-sm">
+        <span class="font-semibold text-ink-2">{r.tool}</span>
+        <span class="text-[10px] tracking-[0.2em] text-muted">SHOWS</span>
+        <span class="text-right text-ink-2">{r.shows}</span>
+      </div>
+    ))}
+    <div class="grid grid-cols-[1fr_auto_1fr] items-center gap-4 bg-ink px-5 py-4 text-sm text-paper">
+      <span class="flex items-center gap-2 font-semibold">
+        <span class="h-1.5 w-1.5 bg-redline"></span>Archify
+      </span>
+      <span class="text-[10px] tracking-[0.2em] text-paper/60">SHOWS</span>
+      <span class="text-right font-semibold">the system</span>
+    </div>
+  </div>
+  <p class="mt-3 text-[12px] text-muted">
+    Every other tool answers a fragment. None answer the real question: <span class="text-ink-2">how does this application work?</span>
+  </p>
+</section>

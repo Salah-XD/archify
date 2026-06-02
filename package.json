@@ -2,6 +2,7 @@
   "name": "archify",
   "version": "0.1.0",
   "description": "Understand any web application — architecture and client-side security, in your browser.",
+  "license": "Apache-2.0",
   "private": true,
   "scripts": {
     "dev": "wxt",

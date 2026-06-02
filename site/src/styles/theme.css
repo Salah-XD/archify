@@ -1,0 +1,33 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #f6f4ee;
+  --color-paper-2: #efece1;
+  --color-ink: #18160f;
+  --color-ink-2: #46412f;
+  --color-muted: #8c8675;
+  --color-line: #d9d4c6;
+  --color-redline: #df4f25;
+  --color-safe: #3f7a4e;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
+}
+
+html { background: var(--color-paper); color: var(--color-ink); }
+
+/* Smooth anchor navigation — only when the user hasn't asked to reduce motion. */
+@media (prefers-reduced-motion: no-preference) {
+  html { scroll-behavior: smooth; }
+}
+/* Keep the sticky navbar from covering a section you jump to. */
+section[id] { scroll-margin-top: 4.5rem; }
+
+/* Section scroll-reveal: default REST = fully visible (no-JS / reduced-motion safe).
+   `reveal-ready` is added by JS only when motion is allowed, so the animation is
+   pure enhancement and content never depends on JS to appear. */
+.reveal-ready main > section:not(#top) {
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal-ready main > section:not(#top):not(.is-visible) {
+  opacity: 0;
+  transform: translateY(14px);
+}

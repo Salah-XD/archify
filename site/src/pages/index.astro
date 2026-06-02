@@ -1,0 +1,42 @@
+---
+import Base from '../layouts/Base.astro';
+import Navbar from '../components/Navbar.astro';
+import Hero from '../components/Hero.astro';
+import Problem from '../components/Problem.astro';
+import LiveDemo from '../components/LiveDemo.svelte';
+import HowItWorks from '../components/HowItWorks.astro';
+import Compare from '../components/Compare.astro';
+import SectionHeader from '../components/SectionHeader.astro';
+import DetectPanel from '../components/DetectPanel.astro';
+import Personas from '../components/Personas.astro';
+import SecuritySection from '../components/SecuritySection.astro';
+import Faq from '../components/Faq.astro';
+import GlasswatchCTA from '../components/GlasswatchCTA.astro';
+import Footer from '../components/Footer.astro';
+---
+<Base>
+  <Navbar />
+  <Hero />
+  <Problem />
+  <LiveDemo client:load />
+  <HowItWorks />
+  <Compare />
+
+  <section class="mx-auto max-w-5xl px-6 py-20">
+    <SectionHeader title="WHAT IT DETECTS" />
+    <div class="grid items-center gap-8 md:grid-cols-[1fr_auto]">
+      <p class="max-w-md text-sm leading-relaxed text-ink-2">
+        Click the toolbar icon for a whole-page profile: the stack it's built on, where it's
+        hosted, and how exposed it is — assembled from runtime signals, with evidence behind
+        every detection.
+      </p>
+      <DetectPanel />
+    </div>
+  </section>
+
+  <Personas />
+  <SecuritySection />
+  <Faq />
+  <GlasswatchCTA />
+  <Footer />
+</Base>

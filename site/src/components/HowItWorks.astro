@@ -1,0 +1,20 @@
+---
+import SectionHeader from './SectionHeader.astro';
+const steps = [
+  { n: '01', t: 'Hover any element', b: 'Move your cursor over anything on the page — a button, a card, a form field. No setup, no config.' },
+  { n: '02', t: 'Archify reads runtime signals', b: 'Framework internals, network calls, the DOM, and form-field listeners — collected locally, in your browser. Nothing is sent anywhere.' },
+  { n: '03', t: 'The system is revealed', b: 'Component, library, the APIs it fires, and what can read your data — each with a confidence score. It never fabricates; unknown is shown as unknown.' },
+];
+---
+<section id="how" class="mx-auto max-w-5xl px-6 py-20">
+  <SectionHeader title="HOW IT WORKS" />
+  <div class="grid gap-4 md:grid-cols-3">
+    {steps.map((s) => (
+      <div class="relative border border-ink/70 bg-paper p-5">
+        <div class="font-mono text-2xl font-semibold text-redline">{s.n}</div>
+        <h3 class="mt-2 text-sm font-semibold">{s.t}</h3>
+        <p class="mt-1.5 text-[12px] leading-relaxed text-ink-2">{s.b}</p>
+      </div>
+    ))}
+  </div>
+</section>
