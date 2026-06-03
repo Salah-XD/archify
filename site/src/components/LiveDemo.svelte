@@ -87,7 +87,8 @@
       <div
         class="mb-3 flex items-center justify-between rounded bg-slate-100 px-3 py-2 text-sm outline-offset-4 {active === 'summary' ? 'outline outline-1 outline-redline' : ''}"
         role="group" aria-label="Order summary" tabindex="0"
-        on:mouseenter={hover('summary')} on:focus={hover('summary')} on:click={trace('summary')}>
+        on:mouseenter={hover('summary')} on:focus={hover('summary')} on:click={trace('summary')}
+        on:keydown={(e) => e.key === 'Enter' && trace('summary')()}>
         <span class="text-slate-500">Order total</span><span class="font-semibold">$49.00</span>
       </div>
 
