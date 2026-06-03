@@ -78,7 +78,7 @@
 
       <div class="mb-2.5 flex gap-2">
         <input class="block w-full rounded border px-2 py-1.5 text-sm" placeholder="MM / YY"
-          on:mouseenter={hover('card')} on:focus={hover('card')} />
+          on:mouseenter={hover('card')} on:focus={hover('card')} on:click={hover('card')} />
         <input
           class="block w-20 rounded border px-2 py-1.5 text-sm outline-offset-4 {active === 'cvc' ? 'outline outline-1 outline-redline' : ''}"
           placeholder="CVC" on:mouseenter={hover('cvc')} on:focus={hover('cvc')} on:click={hover('cvc')} />
@@ -135,7 +135,7 @@
             </div>
           </div>
 
-          {#if targets[active].flow}
+          {#if t.flow}
             <div class="text-[9px] text-muted/70">Click it to trace what it does →</div>
           {/if}
         </div>
