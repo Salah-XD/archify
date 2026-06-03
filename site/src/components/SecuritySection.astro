@@ -11,7 +11,7 @@ import { GLASSWATCH_URL } from '../consts';
       </h2>
       <p class="mt-4 max-w-md text-sm leading-relaxed text-ink-2">
         Archify surfaces every third-party script, every outbound call, and — most importantly —
-        which scripts can read your form and payment fields. The kind of client-side exposure that
+        which scripts listen on your form and payment fields. The kind of client-side exposure that
         a network firewall never sees.
       </p>
       <a href={GLASSWATCH_URL} target="_blank" rel="noopener noreferrer"
@@ -33,7 +33,7 @@ import { GLASSWATCH_URL } from '../consts';
           <div class="mb-1 text-[9px] font-semibold tracking-[0.24em] text-muted">FORM / PAYMENT FIELD ACCESS</div>
           <div class="flex items-start gap-1.5 bg-redline/10 px-2 py-1.5 text-[11px]">
             <span class="font-bold text-redline">!</span>
-            <span><span class="font-semibold">tag.unknown-cdn.io</span> can read the card-number field</span>
+            <span><span class="font-semibold">tag.unknown-cdn.io</span> listens on the card-number field</span>
           </div>
         </div>
       </div>
