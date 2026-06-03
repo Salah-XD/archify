@@ -1,3 +1,87 @@
+# Landing Demo Redesign Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Replace the landing page's three-widget demo with a coherent checkout scene where hovering reveals per-element architecture (crosshair preserved) and clicking the Pay button traces an honest, confidence-scored FLOW — retiring the "TRIGGERED API" overclaim.
+
+**Architecture:** A single Svelte island, `site/src/components/LiveDemo.svelte`, holds a `targets` data map (one entry per inspectable element, each with ARCH readout fields + an optional `flow` array). Reactive state: `active` (hovered → ARCH) and `traced` (clicked → FLOW). The right-hand panel renders `ARCH · SEC · FLOW` tab labels and swaps body between the ARCH readout and the FLOW trace. Flow steps animate in (reduced-motion-safe). No extension changes; the demo is hand-authored marketing content that mirrors the shipped product's honesty model.
+
+**Tech Stack:** Astro + Svelte (client:load island), Tailwind (existing theme tokens: `ink`, `paper`, `paper-2`, `ink-2`, `redline`, `muted`, `line`), Playwright (site smoke suite). Reuses `GaugeRow.svelte` as-is.
+
+---
+
+## File Structure
+
+- **`site/src/components/LiveDemo.svelte`** (rework, single file ~170 lines) — the whole demo: section header + intro copy, the checkout scene, the crosshair reticle, the `targets` data map, and the ARCH/FLOW panel. One cohesive island; do not split unless it exceeds ~180 lines.
+- **`site/src/components/GaugeRow.svelte`** (reuse, no change) — `label`, `value`, `pct`, `dim` props.
+- **`site/tests/site.spec.ts`** (modify) — rewrite the now-invalid hover test; add flow, no-flow, and "TRIGGERED API"-gone assertions.
+
+No other files reference the demo's content (`index.astro` only imports and renders `<LiveDemo client:load />`).
+
+---
+
+## Task 1: Rework the demo into a checkout scene with hover→ARCH / click→FLOW
+
+**Files:**
+- Modify: `site/tests/site.spec.ts` (the `live demo overlay updates on hover` test at lines 39-43, plus new tests)
+- Modify: `site/src/components/LiveDemo.svelte` (full rewrite)
+
+- [ ] **Step 1: Rewrite the demo tests (the contract).**
+
+In `site/tests/site.spec.ts`, **replace** the existing test block:
+
+```ts
+test('live demo overlay updates on hover', async ({ page }) => {
+  await page.goto('/');
+  await page.getByText('Product card').hover();
+  await expect(page.locator('span.font-semibold', { hasText: /^Card$/ })).toBeVisible();
+});
+```
+
+with these five tests:
+
+```ts
+test('live demo: hovering an element updates the ARCH readout', async ({ page }) => {
+  await page.goto('/');
+  await page.getByPlaceholder('email').hover();
+  await expect(page.getByText('<EmailField/>')).toBeVisible();
+});
+
+test('live demo: clicking Pay traces the flow', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Pay $49' }).click();
+  await expect(page.getByText('TRACED FROM YOUR CLICK')).toBeVisible();
+  await expect(page.getByText('POST /api/charge', { exact: false })).toBeVisible();
+  await expect(page.getByText('sets a token', { exact: false })).toBeVisible();
+  await expect(page.getByText('/confirmation', { exact: false })).toBeVisible();
+});
+
+test('live demo: order summary shows the no-flow teaching state', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('group', { name: 'Order summary' }).click();
+  await expect(page.getByText("wasn't triggered by your interaction")).toBeVisible();
+});
+
+test('live demo: card field uses honest "listens on" wording, not "can read"', async ({ page }) => {
+  await page.goto('/');
+  await page.getByPlaceholder('card number').hover();
+  await expect(page.getByText('listens on the card field', { exact: false })).toBeVisible();
+});
+
+test('the demo no longer overclaims a "TRIGGERED API"', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByText('TRIGGERED API')).toHaveCount(0);
+});
+```
+
+- [ ] **Step 2: Run the site tests to confirm they fail.**
+
+Run: `cd site && npm test`
+Expected: FAIL — the new assertions fail because the old component is still present (no `<EmailField/>`, no `TRACED FROM YOUR CLICK`, and `TRIGGERED API` still renders).
+
+- [ ] **Step 3: Replace `site/src/components/LiveDemo.svelte` entirely** with:
+
+```svelte
 <script>
   import { onMount } from 'svelte';
   import GaugeRow from './GaugeRow.svelte';
@@ -78,7 +162,7 @@
 
       <div class="mb-2.5 flex gap-2">
         <input class="block w-full rounded border px-2 py-1.5 text-sm" placeholder="MM / YY"
-          on:mouseenter={hover('card')} on:focus={hover('card')} on:click={hover('card')} />
+          on:mouseenter={hover('card')} on:focus={hover('card')} />
         <input
           class="block w-20 rounded border px-2 py-1.5 text-sm outline-offset-4 {active === 'cvc' ? 'outline outline-1 outline-redline' : ''}"
           placeholder="CVC" on:mouseenter={hover('cvc')} on:focus={hover('cvc')} on:click={hover('cvc')} />
@@ -87,8 +171,7 @@
       <div
         class="mb-3 flex items-center justify-between rounded bg-slate-100 px-3 py-2 text-sm outline-offset-4 {active === 'summary' ? 'outline outline-1 outline-redline' : ''}"
         role="group" aria-label="Order summary" tabindex="0"
-        on:mouseenter={hover('summary')} on:focus={hover('summary')} on:click={trace('summary')}
-        on:keydown={(e) => e.key === 'Enter' && trace('summary')()}>
+        on:mouseenter={hover('summary')} on:focus={hover('summary')} on:click={trace('summary')}>
         <span class="text-slate-500">Order total</span><span class="font-semibold">$49.00</span>
       </div>
 
@@ -136,7 +219,7 @@
             </div>
           </div>
 
-          {#if t.flow}
+          {#if targets[active].flow}
             <div class="text-[9px] text-muted/70">Click it to trace what it does →</div>
           {/if}
         </div>
@@ -178,3 +261,62 @@
   }
   @keyframes flow-rise { to { opacity: 1; transform: none; } }
 </style>
+```
+
+- [ ] **Step 4: Run the site tests to confirm they pass.**
+
+Run: `cd site && npm test`
+Expected: PASS — all five new demo tests green, and the rest of the suite (hero, nav, sections, FAQ, privacy) still green.
+
+- [ ] **Step 5: Commit.**
+
+```bash
+git add site/src/components/LiveDemo.svelte site/tests/site.spec.ts
+git commit -m "feat(site): checkout-scene demo with hover→ARCH / click→FLOW; drop TRIGGERED API"
+```
+
+---
+
+## Task 2: Verify the build and the resilience fallbacks
+
+**Files:** none modified (verification only).
+
+- [ ] **Step 1: Confirm the site builds clean.**
+
+Run: `cd site && npm run build`
+Expected: build completes with no errors; `site/dist/` regenerated.
+
+- [ ] **Step 2: Manual smoke (reduced-motion + crosshair).**
+
+Run: `cd site && npm run preview -- --port 4321` then open `http://localhost:4321`.
+Verify by eye:
+- Moving the mouse over the checkout shows the crosshair reticle + `▸ <type>` tag; the right panel's ARCH readout tracks the hovered element.
+- The card field shows the red SECURITY note "tag.unknown-cdn.io listens on the card field" and the `SEC ●` tab marker.
+- Clicking **Pay $49** flips the panel to FLOW with the three steps animating in; clicking the order total shows the "No flow" teaching state.
+- With OS "reduce motion" enabled, the flow steps appear instantly (no stagger) and are fully visible.
+
+Stop the preview server when done (Ctrl+C).
+
+- [ ] **Step 3: No commit needed** (verification only). If Step 2 surfaced a visual defect, fix it in `LiveDemo.svelte`, re-run `cd site && npm test`, and commit with `fix(site): <what>`.
+
+---
+
+## Self-Review
+
+**Spec coverage:**
+- §2 scene = checkout → Task 1 Step 3 scene markup. ✓
+- §2 hover→ARCH / click→FLOW + crosshair preserved → Step 3 (`hover`/`trace`, reticle block). ✓
+- §2/§8 honest "listens on" wording → Step 3 `card`/`cvc` notes + test in Step 1. ✓
+- §4 per-element data table → `targets` map matches the table (framework constant Next.js 96 in the ARCH readout). ✓
+- §5 flow steps + footer note → Step 3 FLOW block (POST /api/charge / sets a token · localStorage / → /confirmation; high/high/med). ✓
+- §5 order-summary teaching state → `summary.flow: []` + the `flow.length === 0` branch + test. ✓
+- §6 state model (`active`, `traced`, derived `tab`/`flow`, hover resets `traced`) → Step 3 script. ✓
+- §8 "TRIGGERED API" removed → not present in new component + regression test (Step 1). ✓
+- §9 no-JS (`active='pay'` default render), reduced-motion (`animate` gated by matchMedia, steps visible by default), keyboard (`on:focus` mirrors hover; button/group focusable), touch (`on:click={hover(...)}` on fields) → Step 3 + Step 2 manual. ✓
+- §10 tests (hover updates, flow on click, no-flow state, TRIGGERED-API gone) → Step 1; honest-wording test added as a bonus. ✓
+- §11 files → only `LiveDemo.svelte` + `site.spec.ts` touched; `FlowReadout`/`ArchReadout` not extracted (component stays under ~180 lines). ✓
+- §12 success criteria + build clean → Task 2. ✓
+
+**Placeholder scan:** No TBD/TODO; every code step has complete code; commands have expected output. ✓
+
+**Type/name consistency:** `targets` keys (`email`/`card`/`cvc`/`summary`/`pay`) are the only values passed to `hover()`/`trace()` and indexed by `active`/`traced`. Flow item shape `{ text, conf }` is consistent between the data map and the `{#each}` render. `t.danger`/`t.note`/`t.name`/`t.type`/`t.typeC`/`t.lib`/`t.libC` all defined on every `targets` entry. ✓
