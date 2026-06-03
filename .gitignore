@@ -22,6 +22,9 @@ test-results/
 playwright-report/
 /playwright/.cache/
 
+# Brainstorming visual companion (local only)
+.superpowers/
+
 # OS / editor
 .DS_Store
 Thumbs.db
