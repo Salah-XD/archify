@@ -18,7 +18,7 @@ The site's whole pitch is **"100% local · No account · Nothing leaves your bro
 
 - The "collects nothing / local" claim is about **the product (the extension)** — it stays 100% true. The extension still collects nothing.
 - The waitlist is an **explicit, opt-in marketing action** the visitor initiates. Categorically different from silent product telemetry.
-- The captured email goes to **our own Vercel infrastructure — no third party ever touches it** (this is *why* we chose a self-hosted function over Formspree/Buttondown).
+- The captured email goes to **our own Vercel/Upstash backend — no third-party form service or ESP, and the email is never sold or shared** (Vercel/Upstash act only as infrastructure processors; this is *why* we chose a self-hosted function over Formspree/Buttondown).
 - Copy states this plainly, and `/privacy` gets one honest carve-out line.
 
 This constraint outranks conversion. If a choice optimizes signups but muddies the privacy story, we don't make it.
@@ -142,8 +142,8 @@ Vercel deploys any file under the project's `api/` directory as a serverless fun
 │                                              │
 │  [ you@dev.tools            ] [ Join → ]      │
 │                                              │
-│  Stored in our own infrastructure. No third  │
-│  parties. The only thing this site collects. │
+│  One launch email. No tracking, no sharing,  │
+│  no newsletter — stored only to notify you.   │
 └─────────────────────────────────────────────┘
 ```
 
@@ -151,7 +151,7 @@ Vercel deploys any file under the project's `api/` directory as a serverless fun
 - Title: **"Be first to trace your stack."**
 - Body: *"Archify isn't on the Chrome Web Store yet. Drop your email and we'll send one message — the day it launches. No list, no spam, no follow-ups."*
 - Submit: **"Join the waitlist"** → `border border-ink bg-ink text-paper hover:bg-redline` (the established primary-button treatment).
-- Microcopy (the honesty line): *"Stored in our own infrastructure — no third parties. The only thing this site ever collects."*
+- Microcopy (the honesty line): *"One launch email. No tracking, no sharing, no newsletter — we store your address only to tell you when it ships."*
 - Success: *"You're on the list. We'll email you once — at launch."*
 - Surface: `bg-paper` card, `border border-ink`, backdrop `bg-ink/40`. Mono throughout. No rounded-corner / drop-shadow drift from the existing flat aesthetic.
 
