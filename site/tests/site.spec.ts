@@ -79,3 +79,58 @@ test('footer privacy link navigates to /privacy', async ({ page }) => {
   await page.getByRole('link', { name: 'Privacy' }).first().click();
   await expect(page).toHaveURL(/\/privacy\/?$/);
 });
+
+// ---- Waitlist popup (assumes the extension is unpublished: WEBSTORE_URL === '#') ----
+
+const okRoute = (route) =>
+  route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ ok: true, already: false }),
+  });
+
+test('waitlist: clicking the CTA opens the dialog', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Join the waitlist' }).first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(page.getByText('Be first to trace your stack.')).toBeVisible();
+});
+
+test('waitlist: invalid email errors inline, valid email succeeds', async ({ page }) => {
+  await page.route('**/api/waitlist', okRoute);
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Join the waitlist' }).first().click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByLabel('Email address').fill('not-an-email');
+  await dialog.getByRole('button', { name: /Join/ }).click();
+  await expect(dialog.getByText("That doesn't look like an email.")).toBeVisible();
+  await dialog.getByLabel('Email address').fill('dev@example.com');
+  await dialog.getByRole('button', { name: /Join/ }).click();
+  await expect(dialog.getByText("You're on the list.")).toBeVisible();
+});
+
+test('waitlist: dismissing is remembered across reload', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Join the waitlist' }).first().click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await page.reload();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(300);
+  await expect(page.getByRole('dialog')).toBeHidden(); // suppressed by localStorage flag
+});
+
+test('waitlist: auto-fires once on deep scroll, then never again', async ({ page }) => {
+  await page.route('**/api/waitlist', okRoute);
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Join the waitlist' }).first()).toBeVisible();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await expect(page.getByRole('dialog')).toBeVisible(); // auto-fired
+  await page.keyboard.press('Escape');
+  await page.reload();
+  await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
+  await page.waitForTimeout(300);
+  await expect(page.getByRole('dialog')).toBeHidden(); // suppressed
+});

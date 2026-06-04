@@ -15,10 +15,17 @@ const published = WEBSTORE_URL !== '#';
       and behavior behind any web page — directly in your browser. 100% local.
     </p>
     <div class="mt-8 flex flex-wrap items-center gap-3">
-      <a href={WEBSTORE_URL} aria-disabled={!published}
-         class="border border-ink bg-ink px-5 py-2.5 text-[13px] font-semibold text-paper hover:bg-redline hover:border-redline aria-disabled:opacity-80">
-        {published ? 'Add to Chrome' : 'Coming to the Chrome Web Store'}
-      </a>
+      {published ? (
+        <a href={WEBSTORE_URL}
+           class="border border-ink bg-ink px-5 py-2.5 text-[13px] font-semibold text-paper hover:bg-redline hover:border-redline">
+          Add to Chrome
+        </a>
+      ) : (
+        <button type="button" data-waitlist-open
+           class="border border-ink bg-ink px-5 py-2.5 text-[13px] font-semibold text-paper hover:bg-redline hover:border-redline">
+          Join the waitlist
+        </button>
+      )}
       <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
          class="border border-ink px-5 py-2.5 text-[13px] font-semibold hover:bg-paper-2">View on GitHub</a>
     </div>
