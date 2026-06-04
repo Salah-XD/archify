@@ -145,3 +145,9 @@ test('waitlist: exit-intent (mouse leaves toward the tab bar) auto-fires once', 
   );
   await expect(page.getByRole('dialog')).toBeVisible();
 });
+
+test('privacy: waitlist exception is disclosed honestly', async ({ page }) => {
+  await page.goto('/privacy');
+  await expect(page.getByRole('heading', { name: 'The launch waitlist' })).toBeVisible();
+  await expect(page.getByText('Upstash', { exact: false })).toBeVisible();
+});
