@@ -13,6 +13,7 @@
   let lastTrigger = null;
   let dialogEl;
   let emailEl;
+  let doneEl;
   let armed = false;
 
   function persisted() {
@@ -53,6 +54,8 @@
       if (res.ok) {
         persist('joined');
         status = 'success';
+        await tick();
+        doneEl?.focus();
       } else if (res.status === 429) {
         status = 'error'; errorMsg = 'One sec — try again in a moment.';
       } else if (res.status === 400) {
@@ -133,7 +136,7 @@
 
 {#if open}
   <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
-    <button class="absolute inset-0 bg-ink/40" aria-label="Close" tabindex="-1" on:click={closeModal}></button>
+    <button class="absolute inset-0 bg-ink/40" aria-hidden="true" tabindex="-1" on:click={closeModal}></button>
 
     <div
       bind:this={dialogEl}
@@ -156,6 +159,7 @@
           We'll email you once — the day Archify lands on the Chrome Web Store. Nothing else.
         </p>
         <button
+          bind:this={doneEl}
           class="mt-5 border border-ink bg-ink px-4 py-2 text-[13px] font-semibold text-paper hover:border-redline hover:bg-redline"
           on:click={closeModal}>Done</button>
       {:else}
@@ -165,7 +169,7 @@
           day it launches. No list, no spam, no follow-ups.
         </p>
 
-        <form class="mt-5 flex flex-col gap-3" on:submit|preventDefault={submit}>
+        <form class="mt-5 flex flex-col gap-3" novalidate on:submit|preventDefault={submit}>
           <!-- honeypot: off-screen, hidden from AT, catches bots -->
           <div class="absolute -left-[9999px]" aria-hidden="true">
             <label>Company<input type="text" tabindex="-1" autocomplete="off" bind:value={hp} /></label>
@@ -175,8 +179,8 @@
             <input
               bind:this={emailEl}
               bind:value={email}
-              type="text"
-              inputmode="email"
+              type="email"
+              required
               placeholder="you@dev.tools"
               autocomplete="email"
               aria-label="Email address"

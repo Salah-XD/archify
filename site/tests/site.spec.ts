@@ -134,3 +134,14 @@ test('waitlist: auto-fires once on deep scroll, then never again', async ({ page
   await page.waitForTimeout(300);
   await expect(page.getByRole('dialog')).toBeHidden(); // suppressed
 });
+
+test('waitlist: exit-intent (mouse leaves toward the tab bar) auto-fires once', async ({ page }) => {
+  await page.route('**/api/waitlist', okRoute);
+  await page.goto('/');
+  await expect(page.getByRole('button', { name: 'Join the waitlist' }).first()).toBeVisible();
+  await expect(page.getByRole('dialog')).toBeHidden();
+  await page.evaluate(() =>
+    document.dispatchEvent(new MouseEvent('mouseout', { clientY: -1, relatedTarget: null, bubbles: true })),
+  );
+  await expect(page.getByRole('dialog')).toBeVisible();
+});
