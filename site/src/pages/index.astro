@@ -14,6 +14,7 @@ import SecuritySection from '../components/SecuritySection.astro';
 import Faq from '../components/Faq.astro';
 import GlasswatchCTA from '../components/GlasswatchCTA.astro';
 import Footer from '../components/Footer.astro';
+import WaitlistModal from '../components/WaitlistModal.svelte';
 ---
 <Base>
   <Navbar />
@@ -41,4 +42,5 @@ import Footer from '../components/Footer.astro';
   <Faq />
   <GlasswatchCTA />
   <Footer />
+  <WaitlistModal client:load />
 </Base>

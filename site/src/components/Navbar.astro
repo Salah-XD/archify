@@ -22,10 +22,17 @@ const links = [
     <div class="ml-auto flex items-center gap-3">
       <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
          class="hidden text-[11px] tracking-wide text-muted hover:text-ink sm:inline">GitHub</a>
-      <a href={WEBSTORE_URL} aria-disabled={!published}
-         class="border border-ink bg-ink px-3 py-1.5 text-[11px] font-semibold text-paper hover:bg-redline hover:border-redline aria-disabled:opacity-80">
-        {published ? 'Add to Chrome' : 'Coming soon'}
-      </a>
+      {published ? (
+        <a href={WEBSTORE_URL}
+           class="border border-ink bg-ink px-3 py-1.5 text-[11px] font-semibold text-paper hover:bg-redline hover:border-redline">
+          Add to Chrome
+        </a>
+      ) : (
+        <button type="button" data-waitlist-open
+           class="border border-ink bg-ink px-3 py-1.5 text-[11px] font-semibold text-paper hover:bg-redline hover:border-redline">
+          Join the waitlist
+        </button>
+      )}
     </div>
   </nav>
 </header>
