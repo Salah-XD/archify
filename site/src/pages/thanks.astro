@@ -1,0 +1,134 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+import { GITHUB_URL } from '../consts';
+
+const ISSUES_URL = `${GITHUB_URL}/issues`;
+const CONTRIBUTE_URL = `${GITHUB_URL}/contribute`;
+
+const steps = [
+  { k: 'Hover', d: 'Move your cursor over any element to see its framework, component type, UI library, and the APIs it fires — each with an honest confidence score.' },
+  { k: 'Alt + click', d: 'Lock the panel onto an element without triggering it — inspect a button, link, or input field in peace.' },
+  { k: 'Toolbar icon', d: 'Open the popup for the whole-page profile: tech stack, hosting, the live API surface, and a client-side security roll-up.' },
+  { k: 'Ctrl + Shift + H', d: 'Toggle the inspector on or off anytime. Rebindable at chrome://extensions/shortcuts.' },
+];
+---
+<Base
+  title="Thanks for installing Archify"
+  description="Archify is installed. Hover any page to understand the software behind it — 100% local, open source."
+>
+  <header class="border-b border-line">
+    <div class="mx-auto flex max-w-3xl items-center gap-3 px-6 py-4">
+      <a href="/" class="flex items-center gap-2">
+        <span class="h-1.5 w-1.5 bg-redline"></span>
+        <span class="text-[12px] font-semibold tracking-[0.3em]">ARCHIFY</span>
+      </a>
+      <span class="ml-auto text-[11px] text-muted">Open source · Apache-2.0</span>
+    </div>
+  </header>
+
+  <article class="mx-auto max-w-3xl px-6 py-16">
+    <!-- hero -->
+    <div class="mb-3 flex items-center gap-2">
+      <span class="h-1.5 w-1.5 bg-redline"></span>
+      <span class="text-[11px] font-semibold tracking-[0.3em] text-ink">INSTALLED</span>
+    </div>
+    <h1 class="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">You're all set.</h1>
+    <p class="mt-4 max-w-xl text-[14px] leading-relaxed text-ink-2">
+      Archify is now running in your browser. Hover any element on any page to see the system behind it —
+      the framework, the component, the APIs it triggers, and which third-party scripts can read your form
+      and payment fields. Everything runs <span class="text-ink">100% locally</span>: no account, no servers,
+      no telemetry.
+    </p>
+    <div class="mt-6 flex flex-wrap items-center gap-3">
+      <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+         class="border border-ink bg-ink px-4 py-2 text-[12px] font-semibold tracking-wide text-paper hover:border-redline hover:bg-redline">
+        ★ Star on GitHub
+      </a>
+      <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer"
+         class="border border-ink/30 px-4 py-2 text-[12px] tracking-wide text-ink hover:border-ink">
+        Report an issue
+      </a>
+    </div>
+    <p class="mt-4 text-[11px] text-muted">
+      Tip: open it on a checkout or login page and check the <span class="text-redline">SECURITY</span> tab —
+      it shows exactly which scripts can read the card and password fields.
+    </p>
+
+    <!-- quick start -->
+    <section class="mt-16">
+      <div class="mb-5 flex items-center gap-2">
+        <span class="h-1 w-1 bg-redline"></span>
+        <span class="text-[10px] font-semibold tracking-[0.28em] text-ink">QUICK START</span>
+        <span class="h-px flex-1 bg-line"></span>
+      </div>
+      <div class="grid gap-px overflow-hidden border border-line bg-line sm:grid-cols-2">
+        {steps.map((s, i) => (
+          <div class="bg-paper p-5">
+            <div class="flex items-baseline gap-2">
+              <span class="text-[10px] tabular-nums text-muted">0{i + 1}</span>
+              <span class="font-semibold text-ink">{s.k}</span>
+            </div>
+            <p class="mt-2 text-[12px] leading-relaxed text-ink-2">{s.d}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- mission -->
+    <section class="mt-16">
+      <div class="mb-5 flex items-center gap-2">
+        <span class="h-1 w-1 bg-redline"></span>
+        <span class="text-[10px] font-semibold tracking-[0.28em] text-ink">WHY ARCHIFY EXISTS</span>
+        <span class="h-px flex-1 bg-line"></span>
+      </div>
+      <div class="relative border border-ink/80 bg-paper-2 p-7">
+        <span class="pointer-events-none absolute -left-px -top-px h-2.5 w-2.5 border-l border-t border-redline"></span>
+        <span class="pointer-events-none absolute -right-px -top-px h-2.5 w-2.5 border-r border-t border-redline"></span>
+        <span class="pointer-events-none absolute -bottom-px -left-px h-2.5 w-2.5 border-b border-l border-redline"></span>
+        <span class="pointer-events-none absolute -bottom-px -right-px h-2.5 w-2.5 border-b border-r border-redline"></span>
+        <p class="text-[15px] leading-relaxed text-ink">
+          The modern web is a black box. Bundlers minify it, third-party scripts pile up, and even the
+          developers who built a page often can't say what runs on it — or what those scripts can reach.
+        </p>
+        <p class="mt-3 text-[13px] leading-relaxed text-ink-2">
+          Archify makes software legible again. It reads a page's architecture and client-side security
+          straight from what you're looking at, in plain language, with confidence scores it won't fake on
+          minified builds — and it never sends a byte anywhere. Understanding the software you use shouldn't
+          require a backend, an account, or trust in us. So it doesn't.
+        </p>
+      </div>
+    </section>
+
+    <!-- contribute -->
+    <section class="mt-16">
+      <div class="mb-5 flex items-center gap-2">
+        <span class="h-1 w-1 bg-redline"></span>
+        <span class="text-[10px] font-semibold tracking-[0.28em] text-ink">BUILT IN THE OPEN</span>
+        <span class="h-px flex-1 bg-line"></span>
+      </div>
+      <p class="max-w-xl text-[13px] leading-relaxed text-ink-2">
+        Archify is free and open source under Apache-2.0 — no premium tier, no upsell inside the tool. If it's
+        useful, the best thanks is a <span class="text-ink">star</span>; it's how other developers find it.
+        And if you want to make it sharper, contributors are genuinely welcome — a new framework fingerprint,
+        a UI-library signature, a better detection, a bug report. Start small; everything is reviewed in the open.
+      </p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer"
+           class="border border-ink bg-ink px-4 py-2 text-[12px] font-semibold tracking-wide text-paper hover:border-redline hover:bg-redline">
+          ★ Star the repo
+        </a>
+        <a href={CONTRIBUTE_URL} target="_blank" rel="noopener noreferrer"
+           class="border border-ink/30 px-4 py-2 text-[12px] tracking-wide text-ink hover:border-ink">
+          Good first issues
+        </a>
+        <a href={ISSUES_URL} target="_blank" rel="noopener noreferrer"
+           class="border border-ink/30 px-4 py-2 text-[12px] tracking-wide text-ink hover:border-ink">
+          Open an issue
+        </a>
+      </div>
+    </section>
+  </article>
+
+  <Footer />
+</Base>

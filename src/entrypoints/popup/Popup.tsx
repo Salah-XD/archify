@@ -3,21 +3,30 @@ import { browser } from 'wxt/browser';
 import type { PageProfile, TechDetection, ApiSurface } from '../../engine/types';
 import { getHoverEnabled, setHoverEnabled } from '../../shared/settings';
 import { inventoryMarkdown, drawShareCard, exportCard } from './share';
+import { isRestrictedUrl } from '../../shared/pageKind';
 
-type State = { status: 'loading' } | { status: 'ok'; profile: PageProfile } | { status: 'unavailable' };
+type State =
+  | { status: 'loading' }
+  | { status: 'ok'; profile: PageProfile }
+  | { status: 'unavailable' }            // restricted page — chrome://, web store, etc.
+  | { status: 'reload'; tabId: number }; // normal page, but the content script isn't running
 
 export function Popup() {
   const [state, setState] = useState<State>({ status: 'loading' });
 
   useEffect(() => {
     (async () => {
+      const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
+      if (!tab?.id) return setState({ status: 'unavailable' });
+      const restricted = isRestrictedUrl(tab.url);
       try {
-        const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
-        if (!tab?.id) return setState({ status: 'unavailable' });
         const profile = (await browser.tabs.sendMessage(tab.id, { type: 'archify:getProfile' })) as PageProfile | undefined;
-        setState(profile ? { status: 'ok', profile } : { status: 'unavailable' });
+        if (profile) return setState({ status: 'ok', profile });
+        setState(restricted ? { status: 'unavailable' } : { status: 'reload', tabId: tab.id });
       } catch {
-        setState({ status: 'unavailable' }); // no content script on this page (chrome://, web store, …)
+        // sendMessage threw → no content script listening. On a normal page that
+        // means it loaded before Archify was installed/enabled — a reload fixes it.
+        setState(restricted ? { status: 'unavailable' } : { status: 'reload', tabId: tab.id });
       }
     })();
   }, []);
@@ -40,6 +49,7 @@ export function Popup() {
             Archify can't inspect this page. Chrome blocks extensions on browser pages (<span className="text-ink-2">chrome://</span>) and the Web Store — open any normal website to use it.
           </div>
         )}
+        {state.status === 'reload' && <ReloadPrompt tabId={state.tabId} />}
         {state.status === 'ok' && <Profile profile={state.profile} />}
       </div>
 
@@ -127,6 +137,22 @@ function Profile({ profile }: { profile: PageProfile }) {
         </div>
         <Inventory profile={profile} />
       </Section>
+    </div>
+  );
+}
+
+function ReloadPrompt({ tabId }: { tabId: number }) {
+  return (
+    <div className="px-3 py-4 text-[11px] leading-relaxed text-muted">
+      <p className="mb-3">
+        This page was open before Archify was ready. <span className="text-ink">Reload it</span> to inspect the page.
+      </p>
+      <button
+        onClick={() => { void browser.tabs.reload(tabId); window.close(); }}
+        className="border border-ink bg-ink px-3 py-1.5 text-[10px] font-semibold tracking-wide text-paper hover:border-redline hover:bg-redline"
+      >
+        ↻ Reload &amp; analyze
+      </button>
     </div>
   );
 }
