@@ -5,7 +5,7 @@ export function FlowTab({ flow }: { flow: InteractionFlow | null }) {
   if (!flow || flow.steps.length === 0) {
     return (
       <div className="space-y-2">
-        <div className="text-[9px] tracking-[0.2em] text-muted">ARCHITECTURE FLOW</div>
+        <div className="text-[9px] tracking-[0.2em] text-muted">INTERACTION FLOW</div>
         <p className="text-[11px] leading-relaxed text-muted/80">
           Click an element to trace its flow — the API it fires, what it stores, and where it goes.
         </p>

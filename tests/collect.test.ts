@@ -12,4 +12,13 @@ describe('collectDomSignals', () => {
     expect(s.dataAttributes).toContain('data-state');
     expect(s.classList).toContain('MuiPaper-root');
   });
+  it('collects ancestor classes, data-attrs, and tags (library markers live on wrappers)', () => {
+    document.body.innerHTML =
+      `<button class="MuiButton-root" data-radix-thing="x"><span><span id="leaf">Save</span></span></button>`;
+    const s = collectDomSignals(document.getElementById('leaf')!);
+    expect(s.classList).toEqual([]);                       // the leaf itself is bare
+    expect(s.ancestorClasses).toContain('MuiButton-root'); // but the wrapper isn't
+    expect(s.ancestorDataAttributes).toContain('data-radix-thing');
+    expect(s.ancestorTags).toContain('button');
+  });
 });

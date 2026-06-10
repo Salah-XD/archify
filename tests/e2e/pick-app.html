@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" /><title>pick-fixture</title>
+    <style>
+      #go { display: inline-block; margin: 8px; }
+      /* Park the button far from where the panel lands when #go is picked. */
+      #btn { position: absolute; top: 400px; left: 8px; }
+    </style>
+  </head>
+  <body>
+    <a id="go" href="/navigated-away">Go to another page</a>
+    <button id="btn" type="button" onclick="document.title = 'CLICKED'">Press me</button>
+  </body>
+</html>

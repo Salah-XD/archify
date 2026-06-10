@@ -38,4 +38,37 @@ describe('detectComponentType', () => {
     const r = detectComponentType(base);
     expect(r.type).toBe('Generic');
   });
+
+  // -- expanded coverage --
+  it('Link from <a> and from role=link', () => {
+    expect(detectComponentType({ ...base, tag: 'a' }).type).toBe('Link');
+    expect(detectComponentType({ ...base, role: 'link' }).type).toBe('Link');
+  });
+  it('Switch / Radio / Slider from roles', () => {
+    expect(detectComponentType({ ...base, role: 'switch' }).type).toBe('Switch');
+    expect(detectComponentType({ ...base, role: 'radio' }).type).toBe('Radio');
+    expect(detectComponentType({ ...base, role: 'slider' }).type).toBe('Slider');
+  });
+  it('input subtypes: checkbox, radio, range, submit', () => {
+    expect(detectComponentType({ ...base, tag: 'input', inputType: 'checkbox' }).type).toBe('Checkbox');
+    expect(detectComponentType({ ...base, tag: 'input', inputType: 'radio' }).type).toBe('Radio');
+    expect(detectComponentType({ ...base, tag: 'input', inputType: 'range' }).type).toBe('Slider');
+    expect(detectComponentType({ ...base, tag: 'input', inputType: 'submit' }).type).toBe('Button');
+  });
+  it('Input from <textarea>, Dialog from <dialog>, Disclosure from <summary>', () => {
+    expect(detectComponentType({ ...base, tag: 'textarea' }).type).toBe('Input');
+    expect(detectComponentType({ ...base, tag: 'dialog' }).type).toBe('Dialog');
+    expect(detectComponentType({ ...base, tag: 'summary' }).type).toBe('Disclosure');
+  });
+  it('Navigation, Form, Table, Progress, Media from semantic tags', () => {
+    expect(detectComponentType({ ...base, tag: 'nav' }).type).toBe('Navigation');
+    expect(detectComponentType({ ...base, tag: 'form' }).type).toBe('Form');
+    expect(detectComponentType({ ...base, tag: 'table' }).type).toBe('Table');
+    expect(detectComponentType({ ...base, tag: 'progress' }).type).toBe('Progress');
+    expect(detectComponentType({ ...base, tag: 'video' }).type).toBe('Media');
+  });
+  it('Tabs from role=tablist; Alert from role=alert', () => {
+    expect(detectComponentType({ ...base, role: 'tablist' }).type).toBe('Tabs');
+    expect(detectComponentType({ ...base, role: 'alert' }).type).toBe('Alert');
+  });
 });

@@ -24,3 +24,15 @@ export function onHoverEnabledChange(cb: (enabled: boolean) => void): void {
     if (area === 'local' && KEY in changes) cb(changes[KEY].newValue !== false);
   });
 }
+
+const INTRO_KEY = 'archify:seenIntro';
+
+/** Whether the one-time first-run hint has been dismissed. */
+export async function getSeenIntro(): Promise<boolean> {
+  const r = await browser.storage.local.get(INTRO_KEY);
+  return r[INTRO_KEY] === true;
+}
+
+export async function setSeenIntro(): Promise<void> {
+  await browser.storage.local.set({ [INTRO_KEY]: true });
+}

@@ -1,8 +1,6 @@
 import type { ReactNode } from 'react';
 import type { SignalStore } from '../content/signalStore';
 
-const GLASSWATCH_URL = 'https://glasswatch.vercel.app/?utm_source=archify&utm_medium=extension&utm_campaign=security_tab';
-
 export function SecurityTab({ store }: { store: SignalStore }) {
   const { scripts, network, inputAccess } = store.security();
   const thirdPartyScripts = scripts.filter((s) => s.isThirdParty);
@@ -12,12 +10,15 @@ export function SecurityTab({ store }: { store: SignalStore }) {
   return (
     <div className="space-y-2.5">
       <Stat label="THIRD-PARTY SCRIPTS" value={`${thirdPartyScripts.length} / ${scripts.length}`}>
-        {thirdPartyScripts.slice(0, 4).map((s, i) => (
+        {thirdPartyScripts.slice(0, 8).map((s, i) => (
           <div key={i} className="flex items-center gap-1.5 text-[10px] text-ink/80">
             <span className="text-redline">▸</span>
             <span className="truncate">{s.origin}</span>
           </div>
         ))}
+        {thirdPartyScripts.length > 8 && (
+          <div className="pl-3 text-[10px] text-muted/70">+{thirdPartyScripts.length - 8} more</div>
+        )}
       </Stat>
 
       <Stat label="OUTBOUND CALLS" value={`${network.length} → ${thirdPartyDomains.length} ext`} />
@@ -37,16 +38,6 @@ export function SecurityTab({ store }: { store: SignalStore }) {
           ))
         )}
       </div>
-
-      <a
-        href={GLASSWATCH_URL}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="group mt-1 flex items-center justify-between border border-ink/80 px-2 py-1.5 text-[10px] hover:bg-ink hover:text-paper"
-      >
-        <span>Monitor continuously across deploys</span>
-        <span className="text-redline group-hover:text-paper">Glasswatch →</span>
-      </a>
     </div>
   );
 }

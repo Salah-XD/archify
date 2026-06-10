@@ -20,6 +20,8 @@ export interface HoverPayload {
   componentName: string | null;
   x: number;
   y: number;
+  /** Viewport-relative box of the inspected element, for the on-page highlight. */
+  rect: { x: number; y: number; width: number; height: number } | null;
 }
 
 export type InjectedMessage =
@@ -27,6 +29,7 @@ export type InjectedMessage =
   | { kind: 'script'; payload: RawScript }
   | { kind: 'inputAccess'; payload: RawInputAccess }
   | { kind: 'hover'; payload: HoverPayload }
+  | { kind: 'pick'; payload: HoverPayload }
   | { kind: 'pageGlobals'; payload: { globals: string[] } }
   | { kind: 'interaction'; payload: { id: number; component: string | null; dom: DomSignals } }
   | { kind: 'storage'; payload: { area: 'local' | 'session' | 'cookie'; key: string; attribution: Attribution | null } }

@@ -76,9 +76,8 @@ Paste these in the "Permission justification" fields. Reviewers scrutinize `<all
 
 | Permission | Justification |
 |---|---|
-| **host permission `<all_urls>`** | Archify's purpose is to let the developer inspect the architecture and client-side security of whatever page they are currently viewing. It cannot know in advance which sites the user will choose to inspect, so it needs to run its content script on the pages the user visits. All analysis happens locally in the browser; no page data is transmitted off the device. |
+| **host permission `<all_urls>`** | Archify runs automatically on every page the user loads so the architecture and client-side-security read-out is ready the instant they hover an element or open the popup — it cannot know in advance which sites the user will inspect. Its content script and bundled MAIN-world script analyze each page locally; no page data is transmitted off the device. |
 | **scripting** | Used to inject Archify's analysis script into the page the user is inspecting (in the page's MAIN world) so it can read framework internals and intercept network calls. The injected script is bundled with the extension. |
-| **activeTab** | Lets the toolbar popup read the current tab's assembled architecture/security profile when the user opens it. |
 | **storage** | Stores a single local preference — whether the hover inspector is on or off. Stored on the user's device only; no user data is collected. |
 
 ---
@@ -103,6 +102,7 @@ Capture these from the running extension on a real site (a React/Next app shows 
 
 - [ ] Deploy the site to Vercel (root dir = `site/`) → get the URL.
 - [ ] Set Homepage + Privacy policy URLs above to the deployed URLs.
+- [ ] In `src/shared/links.ts`, set `SITE_URL` to the deployed URL **before building the zip**, so the first-install welcome opens `/thanks` (until set, it falls back to the GitHub repo — never a dead tab).
 - [ ] In `site/src/consts.ts`, set `WEBSTORE_URL` to the (pending) listing URL after first publish, and redeploy so the CTA flips to "Add to Chrome".
 - [ ] `npm run build` then `npm run zip` → upload `.output/archify-0.1.0-chrome.zip`.
 - [ ] Capture the screenshots above (1280×800).

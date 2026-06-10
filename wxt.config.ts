@@ -9,7 +9,7 @@ export default defineConfig({
     name: 'Archify',
     description:
       'Understand any web application — architecture and client-side security, in your browser.',
-    permissions: ['storage', 'scripting', 'activeTab'],
+    permissions: ['storage', 'scripting'],
     host_permissions: ['<all_urls>'],
     icons: {
       16: '/icon/16.png',
