@@ -135,8 +135,9 @@ test('FLOW tab shows API + storage + nav for a click interaction but NOT page-lo
       { timeout: 10000 },
     );
 
-    // Click the button — fires the real async handler (fetch POST + localStorage + pushState)
-    // AND locks the Archify overlay on this element.
+    // Plain click — fires the real async handler (fetch POST + localStorage + pushState)
+    // and is traced into the FLOW tab. A plain click no longer locks the overlay
+    // (locking is Alt+click); the overlay stays on its last-hovered element.
     await page.click('#login');
 
     // Wait for the async handler to complete: pushState changes pathname to /dashboard.
@@ -166,6 +167,39 @@ test('FLOW tab shows API + storage + nav for a click interaction but NOT page-lo
       () => document.querySelector('#archify-overlay-host')?.shadowRoot?.textContent ?? '',
     );
     expect(text).not.toContain('/api/bootstrap');
+  } finally {
+    if (context) await context.close();
+    await new Promise<void>((r) => server.close(() => r()));
+  }
+});
+
+test('Alt+click PICKS an element — locks the overlay without triggering the page', async () => {
+  const extDir = extensionDir();
+  const { server, url } = await startFixtureServer(path.resolve(__dirname, 'pick-app.html'));
+  let context: BrowserContext | undefined;
+  try {
+    context = await launchWithExtension(extDir);
+    const page = context.pages()[0] ?? (await context.newPage());
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await page.waitForSelector(HOST, { state: 'attached', timeout: 10000 });
+
+    // Alt+click a real link: navigation must be suppressed and the overlay must lock.
+    await page.hover('#go');
+    await page.click('#go', { modifiers: ['Alt'] });
+
+    // 1) The page did NOT navigate (preventDefault on the pick).
+    expect(new URL(page.url()).pathname).toBe('/');
+
+    // 2) The overlay locked onto the element (footer shows the locked state).
+    await page.waitForFunction(
+      (sel) => (document.querySelector(sel)?.shadowRoot?.textContent ?? '').includes('locked'),
+      HOST,
+      { timeout: 10000 },
+    );
+
+    // 3) Alt+click a button: its onclick handler must NOT fire (title unchanged).
+    await page.click('#btn', { modifiers: ['Alt'] });
+    expect(await page.title()).not.toBe('CLICKED');
   } finally {
     if (context) await context.close();
     await new Promise<void>((r) => server.close(() => r()));

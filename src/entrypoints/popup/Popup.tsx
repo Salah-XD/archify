@@ -33,7 +33,9 @@ export function Popup() {
 
       {state.status === 'loading' && <div className="px-3 py-4 text-[11px] text-muted">reading page…</div>}
       {state.status === 'unavailable' && (
-        <div className="px-3 py-4 text-[11px] text-muted">Archify isn't active on this page.</div>
+        <div className="px-3 py-4 text-[11px] leading-relaxed text-muted">
+          Archify can't inspect this page. Chrome blocks extensions on browser pages (<span className="text-ink-2">chrome://</span>) and the Web Store — open any normal website to use it.
+        </div>
       )}
       {state.status === 'ok' && <Profile profile={state.profile} />}
 
@@ -47,16 +49,22 @@ function HoverToggle() {
   useEffect(() => { getHoverEnabled().then(setOn); }, []);
   if (on === null) return null;
   return (
-    <div className="flex items-center justify-between border-t border-ink/80 px-3 py-2 text-[10px]">
-      <span className="text-muted">
-        Hover inspector <span className="text-muted/60">· Ctrl+Shift+H</span>
-      </span>
-      <button
-        onClick={() => { const next = !on; setOn(next); void setHoverEnabled(next); }}
-        className={`border px-2 py-0.5 tracking-wide ${on ? 'border-ink bg-ink text-paper' : 'border-line text-muted'}`}
-      >
-        {on ? '● ON' : '○ OFF'}
-      </button>
+    <div className="border-t border-ink/80 px-3 py-2">
+      <div className="flex items-center justify-between text-[10px]">
+        <span className="text-muted">
+          Archify inspector <span className="text-muted/60">· Ctrl+Shift+H</span>
+        </span>
+        <button
+          onClick={() => { const next = !on; setOn(next); void setHoverEnabled(next); }}
+          aria-pressed={on}
+          className={`border px-2 py-0.5 tracking-wide ${on ? 'border-ink bg-ink text-paper' : 'border-line text-muted'}`}
+        >
+          {on ? '● ON' : '○ OFF'}
+        </button>
+      </div>
+      <p className="mt-1 text-[9px] leading-snug text-muted/70">
+        Hover any element to inspect it. Alt+click to lock onto one without triggering the page.
+      </p>
     </div>
   );
 }
@@ -107,15 +115,6 @@ function Profile({ profile }: { profile: PageProfile }) {
             </span>
           </div>
         </div>
-        <a
-          href="https://glasswatch.vercel.app/?utm_source=archify&utm_medium=extension&utm_campaign=popup_profile"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-1.5 flex items-center justify-between border border-ink/80 px-2 py-1.5 text-[10px] hover:bg-ink hover:text-paper"
-        >
-          <span>Monitor continuously across deploys</span>
-          <span className="text-redline">Glasswatch →</span>
-        </a>
       </Section>
     </div>
   );
