@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
-import type { PageProfile, TechDetection } from '../../engine/types';
+import type { PageProfile, TechDetection, ApiSurface } from '../../engine/types';
 import { getHoverEnabled, setHoverEnabled } from '../../shared/settings';
+import { inventoryMarkdown, drawShareCard, exportCard } from './share';
 
 type State = { status: 'loading' } | { status: 'ok'; profile: PageProfile } | { status: 'unavailable' };
 
@@ -98,6 +99,10 @@ function Profile({ profile }: { profile: PageProfile }) {
         )}
       </Section>
 
+      <Section title="APIS">
+        <ApiList apis={profile.apis ?? []} />
+      </Section>
+
       <Section title="SECURITY">
         <div className="space-y-0.5 text-[10px]">
           <div className="flex justify-between">
@@ -115,7 +120,92 @@ function Profile({ profile }: { profile: PageProfile }) {
             </span>
           </div>
         </div>
+        <Inventory profile={profile} />
       </Section>
+
+      <ShareRow profile={profile} />
+    </div>
+  );
+}
+
+function ApiList({ apis }: { apis: ApiSurface[] }) {
+  if (apis.length === 0) return <Empty>no API traffic observed yet</Empty>;
+  return (
+    <div className="space-y-1">
+      {apis.slice(0, 6).map((a) => (
+        <div key={a.origin} className="text-[10px]">
+          <div className="flex items-baseline justify-between gap-2">
+            <span className={`truncate ${a.isThirdParty ? 'text-redline' : 'text-ink'}`}>{a.origin}</span>
+            <span className="shrink-0 tabular-nums text-muted">{a.count}× · {a.methods.join('/')}</span>
+          </div>
+          {a.paths[0] && <div className="truncate pl-2 text-[9px] text-muted/70">{a.paths.slice(0, 2).join(' · ')}</div>}
+        </div>
+      ))}
+      {apis.length > 6 && <div className="text-[9px] text-muted/70">+{apis.length - 6} more origins</div>}
+    </div>
+  );
+}
+
+function Inventory({ profile }: { profile: PageProfile }) {
+  const [open, setOpen] = useState(false);
+  const rows = profile.scripts ?? [];
+  if (rows.length === 0) return null;
+  return (
+    <div className="mt-1.5">
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between text-[9px] tracking-[0.12em] text-muted hover:text-ink"
+      >
+        <span>{open ? '▾' : '▸'} SCRIPT INVENTORY <span className="text-muted/60">(PCI DSS 6.4.3)</span></span>
+        <span className="tabular-nums">{rows.filter((r) => !r.inline).length}</span>
+      </button>
+      {open && (
+        <div className="mt-1 max-h-44 space-y-0.5 overflow-y-auto border-t border-line pt-1">
+          {rows.map((r, i) => (
+            <div key={i} className="flex items-center gap-1.5 text-[9px]">
+              <span className={r.readsSensitive ? 'font-bold text-redline' : r.isThirdParty ? 'text-redline/70' : 'text-muted/50'}>
+                {r.readsSensitive ? '!' : '▸'}
+              </span>
+              <span className="truncate text-ink/80" title={r.src ?? undefined}>
+                {r.inline ? '(inline scripts)' : (r.src?.replace(/^https?:\/\//, '') ?? '—')}
+              </span>
+              {r.isThirdParty && <span className="ml-auto shrink-0 text-[8px] text-muted">3P</span>}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ShareRow({ profile }: { profile: PageProfile }) {
+  const [status, setStatus] = useState<string | null>(null);
+  const flash = (s: string) => { setStatus(s); setTimeout(() => setStatus(null), 2000); };
+  return (
+    <div className="flex items-center gap-1.5 border-t border-line pt-2 text-[9px]">
+      <button
+        onClick={async () => {
+          try {
+            const result = await exportCard(drawShareCard(profile), profile.host);
+            flash(result === 'copied' ? 'card copied — paste anywhere' : 'card downloaded');
+          } catch { flash('export failed'); }
+        }}
+        className="border border-ink/80 px-2 py-1 tracking-wide hover:bg-ink hover:text-paper"
+      >
+        SHARE CARD
+      </button>
+      <button
+        onClick={async () => {
+          try {
+            await navigator.clipboard.writeText(inventoryMarkdown(profile));
+            flash('inventory copied as markdown');
+          } catch { flash('copy failed'); }
+        }}
+        className="border border-line px-2 py-1 tracking-wide text-muted hover:border-ink/80 hover:text-ink"
+      >
+        COPY INVENTORY
+      </button>
+      <span className="ml-auto truncate text-muted/70">{status ?? ''}</span>
     </div>
   );
 }

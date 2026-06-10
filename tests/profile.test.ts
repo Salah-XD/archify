@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { assembleProfile, rollupSecurity } from '../src/content/profile';
+import { assembleProfile, rollupSecurity, buildScriptInventory, buildApiSurface } from '../src/content/profile';
 import type { NetworkSignal, ScriptSignal, InputAccessSignal } from '../src/engine/types';
 
 const script = (src: string, tp: boolean): ScriptSignal => ({ src, origin: new URL(src).hostname, inline: false, isThirdParty: tp });
@@ -45,6 +45,48 @@ describe('assembleProfile', () => {
     expect(p.stack.map((d) => d.name)).toContain('Stripe');
     expect(p.hosting.host).toBe('Vercel');
     expect(p.security.totalScripts).toBe(3);
+  });
+});
+
+describe('buildScriptInventory', () => {
+  it('dedupes by src, collapses inline to one row, flags sensitive readers first', () => {
+    const rows = buildScriptInventory(
+      [
+        script('https://a.com/app.js', false),
+        script('https://a.com/app.js', false),          // dupe — dropped
+        script('https://evil.io/sniff.js', true),
+        { src: null, origin: null, inline: true, isThirdParty: false },
+        { src: null, origin: null, inline: true, isThirdParty: false }, // inline ×2 → one row
+      ],
+      [{ field: 'card', scriptOrigin: 'evil.io', via: 'listener' } as InputAccessSignal],
+    );
+    expect(rows.filter((r) => !r.inline)).toHaveLength(2);
+    expect(rows.filter((r) => r.inline)).toHaveLength(1);
+    expect(rows[0].src).toBe('https://evil.io/sniff.js'); // sensitive reader sorts to the top
+    expect(rows[0].readsSensitive).toBe(true);
+  });
+  it('caps the row count', () => {
+    const many = Array.from({ length: 150 }, (_, i) => script(`https://a.com/${i}.js`, false));
+    expect(buildScriptInventory(many, []).filter((r) => !r.inline).length).toBeLessThanOrEqual(100);
+  });
+});
+
+describe('buildApiSurface', () => {
+  it('groups by origin with counts, distinct methods, and sample paths', () => {
+    const surface = buildApiSurface([
+      net('api.acme.com', false), net('api.acme.com', false),
+      { ...net('t.io', true), method: 'BEACON', url: 'https://t.io/collect' },
+    ]);
+    expect(surface[0].origin).toBe('api.acme.com'); // most traffic first
+    expect(surface[0].count).toBe(2);
+    const beacon = surface.find((s) => s.origin === 't.io')!;
+    expect(beacon.methods).toContain('BEACON');
+    expect(beacon.paths).toContain('/collect');
+    expect(beacon.isThirdParty).toBe(true);
+  });
+  it('caps origins and sample paths', () => {
+    const many = Array.from({ length: 40 }, (_, i) => net(`o${i}.io`, true));
+    expect(buildApiSurface(many).length).toBeLessThanOrEqual(20);
   });
 });
 

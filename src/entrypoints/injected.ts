@@ -90,6 +90,7 @@ export default defineUnlistedScript(() => {
     const attribution = tag();
     const url = typeof args[0] === 'string' ? args[0] : (args[0] as Request).url;
     const method = (args[1]?.method ?? (args[0] as Request)?.method ?? 'GET').toUpperCase();
+    markReported(url);
     try {
       const res = await origFetch.apply(this, args);
       post({ kind: 'network', payload: { method, url, status: res.status, latencyMs: Math.round(performance.now() - started), startedAt: started, attribution } });
@@ -111,6 +112,7 @@ export default defineUnlistedScript(() => {
     const meta = (this as any).__archify;
     if (meta) {
       meta.started = performance.now();
+      markReported(meta.url);
       const attribution = tag();
       this.addEventListener('loadend', () => {
         post({ kind: 'network', payload: { method: meta.method, url: meta.url, status: this.status || null,
@@ -119,6 +121,52 @@ export default defineUnlistedScript(() => {
     }
     return origSend.apply(this, a as []);
   };
+
+  // Wrapper-reported URLs (absolute) — the resource-timing backfill below skips
+  // these so a request is never counted twice.
+  const reported = new Set<string>();
+  const markReported = (url: string) => {
+    try { reported.add(new URL(url, location.href).href); } catch { /* opaque url */ }
+  };
+
+  // 2b) sendBeacon — what most analytics actually use for exfil-on-unload.
+  if (navigator.sendBeacon) {
+    const origBeacon = navigator.sendBeacon.bind(navigator);
+    navigator.sendBeacon = function (url: string | URL, data?: BodyInit | null) {
+      markReported(String(url));
+      post({ kind: 'network', payload: { method: 'BEACON', url: String(url), status: null, latencyMs: null, startedAt: performance.now(), attribution: tag() } });
+      return origBeacon(url, data as BodyInit | null);
+    };
+  }
+
+  // 2c) WebSocket — a live third-party socket is an outbound channel the SEC tab must show.
+  const OrigWS = window.WebSocket;
+  window.WebSocket = new Proxy(OrigWS, {
+    construct(target, args: [string | URL, (string | string[])?]) {
+      post({ kind: 'network', payload: { method: 'WS', url: String(args[0]), status: null, latencyMs: null, startedAt: performance.now(), attribution: tag() } });
+      return Reflect.construct(target, args);
+    },
+  });
+
+  // 2d) Resource-timing backfill — catches what the wrappers structurally can't:
+  //     tracking pixels (img never passes through fetch/XHR) AND any fetch/XHR/
+  //     beacon fired at parse time BEFORE the wrappers installed (analytics love
+  //     doing exactly that). buffered:true replays past entries; the `reported`
+  //     set prevents double-counting wrapper-seen requests. WebSocket has no
+  //     resource-timing entry — parse-time sockets remain a known gap.
+  try {
+    const BACKFILL_METHOD: Record<string, string> = { img: 'IMG', beacon: 'BEACON', fetch: 'FETCH', xmlhttprequest: 'XHR' };
+    const seen = new Set<string>();
+    const backfill = (e: PerformanceResourceTiming) => {
+      const method = BACKFILL_METHOD[e.initiatorType];
+      if (!method || seen.has(e.name) || reported.has(e.name)) return;
+      seen.add(e.name);
+      if (seen.size > 500) return; // cap on pathological pages
+      post({ kind: 'network', payload: { method, url: e.name, status: null, latencyMs: Math.round(e.duration), startedAt: e.startTime, attribution: null } });
+    };
+    const po = new PerformanceObserver((list) => list.getEntries().forEach((e) => backfill(e as PerformanceResourceTiming)));
+    po.observe({ type: 'resource', buffered: true });
+  } catch { /* PerformanceObserver unavailable — pixels stay page-level-only */ }
 
   // 3) Script enumeration (initial + observed)
   const reportScript = (el: HTMLScriptElement) => post({ kind: 'script', payload: { src: el.src || null, inline: !el.src } });

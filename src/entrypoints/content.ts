@@ -2,7 +2,7 @@ import { CHANNEL_ATTR, channelName, isInjectedMessage } from '../shared/protocol
 import { SignalStore } from '../content/signalStore';
 import { FlowStore } from '../content/flowStore';
 import { mountOverlay } from '../content/overlay';
-import { assembleProfile, rollupSecurity } from '../content/profile';
+import { assembleProfile, rollupSecurity, buildScriptInventory, buildApiSurface } from '../content/profile';
 import { ALL_DOM_SELECTORS } from '../engine/techStack';
 
 export default defineContentScript({
@@ -116,6 +116,8 @@ export default defineContentScript({
           headers: hostHeaders,
           assetOrigins,
           security: rollupSecurity(sec),
+          scripts: buildScriptInventory(sec.scripts, sec.inputAccess),
+          apis: buildApiSurface(sec.network),
         });
       })();
     });

@@ -109,12 +109,32 @@ export interface SecurityRollup {
   sensitiveReaders: number;
 }
 
+/** One row of the exportable script inventory (the PCI DSS 6.4.3 artifact). */
+export interface ScriptInventoryRow {
+  origin: string | null;     // null = inline
+  src: string | null;
+  inline: boolean;
+  isThirdParty: boolean;
+  readsSensitive: boolean;   // this script's origin was seen on a password/card/cvc field
+}
+
+/** Observed API traffic grouped by origin — the page's runtime API surface. */
+export interface ApiSurface {
+  origin: string;
+  isThirdParty: boolean;
+  count: number;
+  methods: string[];         // distinct methods seen (GET/POST/BEACON/WS/IMG…)
+  paths: string[];           // sample endpoint paths (capped)
+}
+
 export interface PageProfile {
   url: string;
   host: string;
   stack: TechDetection[];
   hosting: HostingProfile;
   security: SecurityRollup;
+  scripts?: ScriptInventoryRow[];
+  apis?: ApiSurface[];
 }
 
 // ---- Architecture Flow (Bet B) ----
