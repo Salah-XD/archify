@@ -9,21 +9,20 @@ import Footer from '../components/Footer.astro';
       <span class="text-[11px] font-semibold tracking-[0.3em] text-ink">PRIVACY POLICY</span>
     </div>
     <h1 class="mb-2 text-2xl font-semibold tracking-tight text-ink">Archify collects nothing.</h1>
-    <p class="mb-6 text-muted">Last updated: 2 June 2026</p>
+    <p class="mb-6 text-muted">Last updated: 10 June 2026</p>
 
     <h2 class="mb-1 mt-6 text-sm font-semibold text-ink">Data we collect</h2>
     <p>None. Archify runs entirely in your browser. There are no servers, no accounts, no analytics, and no telemetry. Page contents are never stored or transmitted. The per-tab analysis Archify builds is held only in memory and destroyed when you navigate away.</p>
 
     <h2 class="mb-1 mt-6 text-sm font-semibold text-ink">Permissions, and why each is needed</h2>
     <ul class="ml-4 list-disc space-y-1">
-      <li><strong>Access to the sites you visit (host permission):</strong> required to observe and analyze the page you choose to inspect. Archify only analyzes locally; it never sends page data anywhere.</li>
-      <li><strong>scripting:</strong> to inject the local analysis script into the page you are inspecting.</li>
+      <li><strong>Access to the sites you visit (host permission):</strong> Archify's analysis runs on the pages you open, so the inspector is ready the moment you hover. All analysis happens locally in your browser; page data is never sent anywhere.</li>
+      <li><strong>scripting:</strong> to inject the local analysis script into the page you're viewing.</li>
       <li><strong>storage:</strong> to remember your local preferences (e.g., whether the hover inspector is on). Stored on your device only.</li>
-      <li><strong>activeTab:</strong> so the popup can read the current tab's architecture profile when you open it.</li>
     </ul>
 
     <h2 class="mb-1 mt-6 text-sm font-semibold text-ink">Network activity</h2>
-    <p>Archify makes a same-origin request to the page's own URL to read its hosting response headers. Nothing is sent to Archify or any third party. Outbound links (GitHub, Glasswatch) are followed only when you click them.</p>
+    <p>Archify makes a single same-origin request to the page's own URL, to read its hosting response headers. That is the extension's only network request — nothing is sent to Archify or any third party, and no remote code is loaded. This website (where you're reading this) links out to GitHub and Glasswatch; those open only when you click them.</p>
 
     <h2 class="mb-1 mt-6 text-sm font-semibold text-ink">Third parties</h2>
     <p>None. Archify shares no data with anyone.</p>
