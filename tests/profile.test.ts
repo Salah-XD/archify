@@ -53,7 +53,8 @@ describe('assembleProfile (realistic)', () => {
     const p = assembleProfile({
       url: 'https://acme.com/', host: 'acme.com',
       signals: {
-        globals: ['__NEXT_DATA__', 'Stripe', 'dataLayer'],
+        // gtag (not bare dataLayer — that alone means GTM) is what a real GA4 site exposes.
+        globals: ['__NEXT_DATA__', 'Stripe', 'gtag'],
         scriptSrcs: ['https://acme.com/_next/static/x.js', 'https://js.stripe.com/v3'],
         metaGenerator: null, cookieNames: [], domHints: [],
       },

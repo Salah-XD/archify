@@ -5,7 +5,9 @@
     <h1>Profile fixture</h1>
     <script src="https://js.stripe.com/v3"></script>
     <script>
+      // Real GA4 exposes gtag (dataLayer alone is GTM — and reads as such now).
       window.dataLayer = window.dataLayer || [];
+      window.gtag = function () { window.dataLayer.push(arguments); };
       window.Stripe = function () {};
     </script>
   </body>

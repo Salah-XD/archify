@@ -1,6 +1,6 @@
 import { CHANNEL_ATTR, channelName, type InjectedMessage, type HoverPayload } from '../shared/protocol';
 import { collectDomSignals } from '../shared/collectDom';
-import { collectFrameworkSignals, reactComponentName } from '../shared/detectInPage';
+import { collectFrameworkSignals, reactComponentName, astroIslandName } from '../shared/detectInPage';
 import { GLOBAL_PROBES } from '../engine/techStack';
 
 export default defineUnlistedScript(() => {
@@ -9,6 +9,27 @@ export default defineUnlistedScript(() => {
   document.documentElement.removeAttribute(CHANNEL_ATTR);
   const channel = channelName(nonce);
   const post = (m: InjectedMessage) => document.dispatchEvent(new CustomEvent(channel, { detail: m }));
+
+  // Build the full inspection payload for an element, including its on-screen box
+  // (used both for live hover and for an Alt+click "pick"). Tolerates exotic nodes.
+  function buildHoverPayload(el: Element, x: number, y: number): HoverPayload {
+    let rect: HoverPayload['rect'] = null;
+    try {
+      const r = el.getBoundingClientRect();
+      rect = { x: r.x, y: r.y, width: r.width, height: r.height };
+    } catch { /* cross-origin / exotic element — skip the highlight box */ }
+    return {
+      dom: collectDomSignals(el),
+      framework: collectFrameworkSignals(el),
+      // React fiber name first; otherwise an Astro island's authored name (opts.name).
+      componentName: reactComponentName(el) ?? astroIslandName(el),
+      x, y, rect,
+    };
+  }
+
+  // The content script mirrors the on/off setting here so this MAIN-world probe can
+  // skip its (expensive) framework walk entirely when the inspector is disabled.
+  const isOn = () => document.documentElement.getAttribute('data-archify-on') !== '0';
 
   // ---- Architecture Flow: interaction tracking ----
   let interactionCounter = 0;
@@ -37,6 +58,16 @@ export default defineUnlistedScript(() => {
   };
   document.addEventListener('click', (e) => {
     if (!e.isTrusted || !(e.target instanceof Element)) return;
+    if (e.altKey) {
+      // PICK: inspect & lock this exact element WITHOUT firing the page's own
+      // action (no navigation / submit / focus). This is the gesture that lets a
+      // developer freeze the overlay on a button, link, or input and read it.
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      post({ kind: 'pick', payload: buildHoverPayload(e.target, e.clientX, e.clientY) });
+      return;
+    }
+    // Plain click: let the page act normally and trace the resulting Flow.
     beginFrom(e.target);
   }, true);
   document.addEventListener('submit', (e) => {
@@ -132,6 +163,7 @@ export default defineUnlistedScript(() => {
   let pending: MouseEvent | null = null;
   let scheduled = false;
   document.addEventListener('mousemove', (e) => {
+    if (!isOn()) return; // inspector off → don't pay the per-frame probe cost
     const t = e.target as Element | null;
     if (!(t instanceof Element)) return;
     if (t.closest('#archify-overlay-host')) return; // never inspect our own overlay
@@ -143,24 +175,49 @@ export default defineUnlistedScript(() => {
       const ev = pending;
       const el = ev?.target as Element | null;
       if (!ev || !(el instanceof Element)) return;
-      const payload: HoverPayload = {
-        dom: collectDomSignals(el),
-        framework: collectFrameworkSignals(el),
-        componentName: reactComponentName(el),
-        x: ev.clientX,
-        y: ev.clientY,
-      };
-      post({ kind: 'hover', payload });
+      try {
+        post({ kind: 'hover', payload: buildHoverPayload(el, ev.clientX, ev.clientY) });
+      } catch { /* one exotic element must not kill the probe for the rest of the page */ }
     });
+  }, true);
+
+  // Keyboard parity: as focus moves (Tab navigation), inspect the focused element
+  // so the tool is usable without a mouse.
+  document.addEventListener('focusin', (e) => {
+    if (!isOn()) return;
+    const t = e.target;
+    if (!(t instanceof Element) || t.closest('#archify-overlay-host')) return;
+    try {
+      const r = t.getBoundingClientRect();
+      post({ kind: 'hover', payload: buildHoverPayload(t, r.x, r.y) });
+    } catch { /* ignore exotic focus targets */ }
   }, true);
 
   // 6) Page-wide tech globals — probed in the MAIN world on load + a follow-up,
   //    because analytics/payment scripts attach their globals after document_start.
+  //    The devtools hooks are installed by the DevTools EXTENSIONS on every page;
+  //    only report them when a real renderer/app has registered.
+  const GLOBAL_GATES: Record<string, () => boolean> = {
+    __REACT_DEVTOOLS_GLOBAL_HOOK__: () => {
+      const h = (window as Record<string, any>).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+      return !!h && (h.renderers?.size ?? 0) > 0;
+    },
+    __VUE_DEVTOOLS_GLOBAL_HOOK__: () => {
+      const h = (window as Record<string, any>).__VUE_DEVTOOLS_GLOBAL_HOOK__;
+      return !!h && ((h.apps?.length ?? 0) > 0 || !!h.Vue);
+    },
+  };
   const snapshotGlobals = () =>
-    post({ kind: 'pageGlobals', payload: { globals: GLOBAL_PROBES.filter((k) => k in window) } });
+    post({ kind: 'pageGlobals', payload: { globals: GLOBAL_PROBES.filter((k) => k in window && (GLOBAL_GATES[k]?.() ?? true)) } });
   if (document.readyState === 'complete') snapshotGlobals();
   else window.addEventListener('load', snapshotGlobals, { once: true });
   setTimeout(snapshotGlobals, 2000);
+
+  // The content script pokes this channel when the popup wants a FRESH snapshot
+  // (consent-gated analytics and lazy SDKs attach long after load+2s).
+  document.addEventListener(`${channel}:cmd`, (e) => {
+    if ((e as CustomEvent).detail === 'probeGlobals') snapshotGlobals();
+  });
 
   // Re-probe after SPA route changes — globals can attach on a client-side navigation.
   // Also post nav messages for flow attribution.

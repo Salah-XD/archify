@@ -45,16 +45,100 @@ function elementOrAncestorHasVue(el: Element | null, depth = 8): boolean {
   return false;
 }
 
+const SVELTE_CLASS = /^svelte-[a-z0-9]+$/i;
+function elementOrAncestorHasSvelteClass(el: Element | null, depth = 8): boolean {
+  let cur: Element | null = el;
+  let d = 0;
+  while (cur && d < depth) {
+    if (Array.from(cur.classList).some((c) => SVELTE_CLASS.test(c))) return true;
+    cur = cur.parentElement;
+    d++;
+  }
+  return false;
+}
+
+/** Solid stores delegated handlers as `$$click`/`$$input`-style element expandos. */
+const SOLID_EXPANDO = /^\$\$[a-z]+$/;
+function elementOrAncestorHasSolidExpando(el: Element | null, depth = 8): boolean {
+  let cur: Element | null = el;
+  let d = 0;
+  while (cur && d < depth) {
+    if (ownKeys(cur).some((k) => SOLID_EXPANDO.test(k))) return true;
+    cur = cur.parentElement;
+    d++;
+  }
+  return false;
+}
+
+/** Astro islands carry `opts={"name":"<displayName>", …}` — the authored component name. */
+export function astroIslandName(el: Element): string | null {
+  const island = el.closest('astro-island');
+  if (!island) return null;
+  try {
+    const opts = JSON.parse(island.getAttribute('opts') ?? '');
+    return typeof opts?.name === 'string' && opts.name ? opts.name : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Nearest registered custom element (tag contains '-' and is defined). */
+function nearestCustomElement(el: Element | null, depth = 8): string | null {
+  let cur: Element | null = el;
+  let d = 0;
+  while (cur && d < depth) {
+    const tag = cur.tagName.toLowerCase();
+    if (tag.includes('-') && customElements.get(tag)) return tag;
+    cur = cur.parentElement;
+    d++;
+  }
+  return null;
+}
+
+const HTMX_ATTRS = ['hx-get', 'hx-post', 'hx-put', 'hx-delete', 'hx-trigger', 'data-hx-get', 'data-hx-post'];
+function nearestHtmxAttr(el: Element): string | null {
+  const owner = el.closest(HTMX_ATTRS.map((a) => `[${a}]`).join(','));
+  if (!owner) return null;
+  for (const a of HTMX_ATTRS) {
+    const v = owner.getAttribute(a);
+    if (v !== null) return `${a}="${v}"`;
+  }
+  return null;
+}
+
+/** The React/Vue devtools hooks are installed by the DevTools EXTENSIONS on every
+ *  page — only count them when a real renderer/app has registered. */
+function reactHookActive(): boolean {
+  const h = (window as Record<string, any>).__REACT_DEVTOOLS_GLOBAL_HOOK__;
+  return !!h && ((h.renderers?.size ?? 0) > 0 || (Array.isArray(h._renderers) && h._renderers.length > 0));
+}
+function vueHookActive(): boolean {
+  const h = (window as Record<string, any>).__VUE_DEVTOOLS_GLOBAL_HOOK__;
+  return !!h && ((h.apps?.length ?? 0) > 0 || !!h.Vue);
+}
+
 export function collectFrameworkSignals(el: Element): FrameworkSignals {
   return {
-    hasReactDevtoolsHook: '__REACT_DEVTOOLS_GLOBAL_HOOK__' in window,
+    hasReactDevtoolsHook: reactHookActive(),
     hasReactFiberKeys: elementOrAncestorHasReactFiber(el),
     hasNextData: '__NEXT_DATA__' in window || !!document.getElementById('__NEXT_DATA__'),
     hasVueInstance: elementOrAncestorHasVue(el),
-    hasVueDevtoolsHook: '__VUE_DEVTOOLS_GLOBAL_HOOK__' in window,
+    hasVueDevtoolsHook: vueHookActive(),
     hasNgGlobal: 'ng' in window,
     ngVersionAttr: el.closest('[ng-version]')?.getAttribute('ng-version') ?? null,
-    hasSvelteClass: Array.from(el.classList).some((c) => /^svelte-[a-z0-9]+$/i.test(c)),
+    hasSvelteClass: elementOrAncestorHasSvelteClass(el),
+    inAstroIsland: !!el.closest('astro-island'),
+    astroIslandName: astroIslandName(el),
+    pageHasAstroIslands: !!document.querySelector('astro-island'),
+    hasSolidExpando: elementOrAncestorHasSolidExpando(el),
+    hasSolidHydration: '_$HY' in window,
+    inQwikContainer: !!el.closest('[q\\:id]') || !!document.querySelector('[q\\:container]'),
+    alpineData: el.closest('[x-data]')?.getAttribute('x-data') ?? null,
+    litTag: nearestCustomElement(el),
+    hasLitGlobal: 'litElementVersions' in window || 'litHtmlVersions' in window,
+    htmxAttr: nearestHtmxAttr(el),
+    hasHtmxGlobal: 'htmx' in window,
+    stimulusController: el.closest('[data-controller]')?.getAttribute('data-controller') ?? null,
   };
 }
 
