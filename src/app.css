@@ -12,3 +12,28 @@
   --color-safe: #3f7a4e;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, Consolas, monospace;
 }
+
+/* Draughtsman scrollbars — square, hairline-bordered, instrument-like.
+   Shared by the popup (app.css import) and the overlay (shadow-root inline). */
+* {
+  scrollbar-width: thin;                                  /* Firefox */
+  scrollbar-color: var(--color-ink-2) var(--color-paper-2);
+}
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper-2);
+  border-left: 1px solid var(--color-line);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink-2);
+  border: 2px solid var(--color-paper-2);                 /* inset bar, no radius */
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-redline);
+}
+::-webkit-scrollbar-corner {
+  background: var(--color-paper-2);
+}

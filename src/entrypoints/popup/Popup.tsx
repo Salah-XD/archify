@@ -23,8 +23,8 @@ export function Popup() {
   }, []);
 
   return (
-    <div className="w-80 bg-paper font-mono text-ink">
-      <header className="flex items-center gap-2 border-b border-ink/80 px-3 py-2.5">
+    <div className="flex max-h-[560px] w-80 flex-col bg-paper font-mono text-ink">
+      <header className="flex shrink-0 items-center gap-2 border-b border-ink/80 px-3 py-2.5">
         <span className="h-1.5 w-1.5 bg-redline" />
         <span className="text-[11px] font-semibold tracking-[0.28em]">ARCHIFY</span>
         <span className="ml-auto truncate text-[10px] text-muted">
@@ -32,14 +32,19 @@ export function Popup() {
         </span>
       </header>
 
-      {state.status === 'loading' && <div className="px-3 py-4 text-[11px] text-muted">reading page…</div>}
-      {state.status === 'unavailable' && (
-        <div className="px-3 py-4 text-[11px] leading-relaxed text-muted">
-          Archify can't inspect this page. Chrome blocks extensions on browser pages (<span className="text-ink-2">chrome://</span>) and the Web Store — open any normal website to use it.
-        </div>
-      )}
-      {state.status === 'ok' && <Profile profile={state.profile} />}
+      {/* Header and toggle stay pinned; the profile scrolls between them. */}
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        {state.status === 'loading' && <div className="px-3 py-4 text-[11px] text-muted">reading page…</div>}
+        {state.status === 'unavailable' && (
+          <div className="px-3 py-4 text-[11px] leading-relaxed text-muted">
+            Archify can't inspect this page. Chrome blocks extensions on browser pages (<span className="text-ink-2">chrome://</span>) and the Web Store — open any normal website to use it.
+          </div>
+        )}
+        {state.status === 'ok' && <Profile profile={state.profile} />}
+      </div>
 
+      {/* Pinned: the share/export actions must never scroll below the fold. */}
+      {state.status === 'ok' && <ShareRow profile={state.profile} />}
       <HoverToggle />
     </div>
   );
@@ -50,7 +55,7 @@ function HoverToggle() {
   useEffect(() => { getHoverEnabled().then(setOn); }, []);
   if (on === null) return null;
   return (
-    <div className="border-t border-ink/80 px-3 py-2">
+    <div className="shrink-0 border-t border-ink/80 px-3 py-2">
       <div className="flex items-center justify-between text-[10px]">
         <span className="text-muted">
           Archify inspector <span className="text-muted/60">· Ctrl+Shift+H</span>
@@ -122,8 +127,6 @@ function Profile({ profile }: { profile: PageProfile }) {
         </div>
         <Inventory profile={profile} />
       </Section>
-
-      <ShareRow profile={profile} />
     </div>
   );
 }
@@ -160,7 +163,9 @@ function Inventory({ profile }: { profile: PageProfile }) {
         <span className="tabular-nums">{rows.filter((r) => !r.inline).length}</span>
       </button>
       {open && (
-        <div className="mt-1 max-h-44 space-y-0.5 overflow-y-auto border-t border-line pt-1">
+        // No inner scroll — the inventory flows in the popup's main scroll region
+        // (nested scrollbars inside a 560px popup fight each other).
+        <div className="mt-1 space-y-0.5 border-t border-line pt-1">
           {rows.map((r, i) => (
             <div key={i} className="flex items-center gap-1.5 text-[9px]">
               <span className={r.readsSensitive ? 'font-bold text-redline' : r.isThirdParty ? 'text-redline/70' : 'text-muted/50'}>
@@ -182,7 +187,7 @@ function ShareRow({ profile }: { profile: PageProfile }) {
   const [status, setStatus] = useState<string | null>(null);
   const flash = (s: string) => { setStatus(s); setTimeout(() => setStatus(null), 2000); };
   return (
-    <div className="flex items-center gap-1.5 border-t border-line pt-2 text-[9px]">
+    <div className="flex shrink-0 items-center gap-1.5 border-t border-ink/80 px-3 py-2 text-[9px]">
       <button
         onClick={async () => {
           try {
