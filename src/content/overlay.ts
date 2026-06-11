@@ -55,7 +55,7 @@ export function mountOverlay(store: SignalStore, flow: FlowStore): OverlayContro
   document.documentElement.appendChild(host);
 
   const root: Root = createRoot(panel);
-  let enabled = true;        // persisted setting (default ON); refreshed below
+  let enabled = false;       // persisted setting (default OFF); refreshed below
   let locked = false;
   let hidden = false;        // soft-hide via Esc; cleared by the next hover
   let latest: HoverPayload | null = null;

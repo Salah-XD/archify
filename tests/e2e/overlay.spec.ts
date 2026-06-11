@@ -46,7 +46,7 @@ function extensionDir(): string {
 
 async function launchWithExtension(extDir: string): Promise<BrowserContext> {
   // MV3 extensions require non-old-headless; headless:false works on desktops.
-  return chromium.launchPersistentContext('', {
+  const context = await chromium.launchPersistentContext('', {
     headless: false,
     args: [
       `--disable-extensions-except=${extDir}`,
@@ -55,6 +55,12 @@ async function launchWithExtension(extDir: string): Promise<BrowserContext> {
       '--disable-dev-shm-usage',
     ],
   });
+  // The hover inspector ships opt-in (default OFF); these tests exercise the
+  // overlay, so turn it on the way the popup toggle would — before any page loads.
+  let [sw] = context.serviceWorkers();
+  if (!sw) sw = await context.waitForEvent('serviceworker');
+  await sw.evaluate(() => chrome.storage.local.set({ 'archify:hoverEnabled': true }));
+  return context;
 }
 
 const HOST = '#archify-overlay-host';
