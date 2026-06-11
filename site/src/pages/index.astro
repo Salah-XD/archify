@@ -7,8 +7,7 @@ import Evidence from '../components/Evidence.astro';
 import LiveDemo from '../components/LiveDemo.svelte';
 import HowItWorks from '../components/HowItWorks.astro';
 import Compare from '../components/Compare.astro';
-import SectionHeader from '../components/SectionHeader.astro';
-import DetectPanel from '../components/DetectPanel.astro';
+import DetectRegistry from '../components/DetectRegistry.astro';
 import Personas from '../components/Personas.astro';
 import SecuritySection from '../components/SecuritySection.astro';
 import Faq from '../components/Faq.astro';
@@ -25,17 +24,7 @@ import WaitlistModal from '../components/WaitlistModal.svelte';
   <HowItWorks />
   <Compare />
 
-  <section class="mx-auto max-w-5xl px-6 py-20">
-    <SectionHeader title="WHAT IT DETECTS" />
-    <div class="grid items-center gap-8 md:grid-cols-[minmax(0,26rem)_auto] md:justify-center md:gap-14">
-      <p class="max-w-md text-sm leading-relaxed text-ink-2">
-        Click the toolbar icon for a whole-page profile: the stack it's built on, where it's
-        hosted, and how exposed it is — assembled from runtime signals, with evidence behind
-        every detection.
-      </p>
-      <DetectPanel />
-    </div>
-  </section>
+  <DetectRegistry />
 
   <Personas />
   <SecuritySection />

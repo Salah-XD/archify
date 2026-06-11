@@ -1,0 +1,113 @@
+---
+import SectionHeader from './SectionHeader.astro';
+import DetectPanel from './DetectPanel.astro';
+
+/**
+ * The detection registry — a draughtsman "schedule" of what the engine
+ * actually fingerprints. Every name below exists in src/engine; the +N
+ * counts are the real remainder per category. Honesty is the brand:
+ * don't add a name here before the engine detects it.
+ */
+const rows = [
+  {
+    n: '01',
+    cat: 'FRAMEWORKS & RUNTIMES',
+    names: ['React', 'Next.js', 'Vue', 'Nuxt', 'Angular', 'Svelte', 'SvelteKit', 'Astro', 'Remix', 'SolidJS', 'Preact', 'Qwik', 'Gatsby', 'htmx', 'Alpine.js', 'Lit', 'Blazor', 'Flutter Web'],
+    more: 7,
+  },
+  {
+    n: '02',
+    cat: 'UI LIBRARIES & STYLING',
+    names: ['MUI', 'Ant Design', 'Chakra UI', 'Radix UI', 'Mantine', 'Tailwind CSS', 'Bootstrap', 'Vuetify', 'Headless UI', 'Ionic', 'Carbon', 'Fluent UI'],
+    more: 7,
+  },
+  {
+    n: '03',
+    cat: 'ANALYTICS & PIXELS',
+    names: ['Google Analytics', 'Google Tag Manager', 'Meta Pixel', 'TikTok Pixel', 'X Pixel', 'LinkedIn Insight', 'Segment', 'Mixpanel', 'Amplitude', 'PostHog', 'Hotjar', 'Plausible', 'Matomo', 'Microsoft Clarity'],
+    more: 9,
+  },
+  {
+    n: '04',
+    cat: 'COMMERCE & PAYMENTS',
+    names: ['Stripe', 'PayPal', 'Braintree', 'Shopify', 'WooCommerce', 'Magento', 'BigCommerce', 'Salesforce Commerce', 'Klaviyo', 'Mailchimp'],
+    more: 0,
+  },
+  {
+    n: '05',
+    cat: 'CMS & SITE BUILDERS',
+    names: ['WordPress', 'Drupal', 'Ghost', 'Contentful', 'Sanity', 'Webflow', 'Framer', 'Wix', 'Squarespace', 'Joomla'],
+    more: 6,
+  },
+  {
+    n: '06',
+    cat: 'HOSTING · AUTH · DEFENSES',
+    names: ['Vercel', 'Netlify', 'Cloudflare', 'Fastly', 'AWS', 'GitHub Pages', 'Auth0', 'Clerk', 'NextAuth.js', 'Supabase', 'Firebase', 'Sentry', 'reCAPTCHA', 'hCaptcha', 'Turnstile'],
+    more: 10,
+  },
+];
+---
+<section id="detects" class="mx-auto max-w-5xl px-6 py-20">
+  <SectionHeader title="WHAT IT DETECTS" />
+
+  <div class="mb-10 grid items-end gap-6 md:grid-cols-[auto_1fr]">
+    <h2 class="text-2xl font-semibold leading-tight md:text-3xl">
+      <span class="text-redline">100+</span> fingerprints.<br />Zero guesses.
+    </h2>
+    <p class="max-w-md text-[14px] leading-relaxed text-ink-2 md:justify-self-end">
+      Hover an element or click the toolbar icon for the whole-page profile —
+      the stack, the host, the trackers, the scripts near your card field.
+      All of it verified at runtime, with evidence behind every line.
+    </p>
+  </div>
+
+  <div class="registry relative border border-ink bg-paper">
+    <!-- redline corner ticks — the drafting-frame signature -->
+    <span aria-hidden="true" class="tick absolute -left-px -top-px border-l-2 border-t-2"></span>
+    <span aria-hidden="true" class="tick absolute -right-px -top-px border-r-2 border-t-2"></span>
+    <span aria-hidden="true" class="tick absolute -bottom-px -left-px border-b-2 border-l-2"></span>
+    <span aria-hidden="true" class="tick absolute -bottom-px -right-px border-b-2 border-r-2"></span>
+
+    <div class="grid lg:grid-cols-[1fr_auto]">
+      <ul class="divide-y divide-line p-2 sm:p-4">
+        {rows.map((r) => (
+          <li class="group grid gap-x-5 gap-y-1 px-2 py-4 sm:grid-cols-[2rem_11.5rem_1fr] sm:px-3">
+            <span class="font-mono text-sm font-semibold text-muted transition-colors group-hover:text-redline">{r.n}</span>
+            <span class="self-start pt-[3px] text-[10px] font-semibold tracking-[0.22em] text-ink">{r.cat}</span>
+            <p class="text-[13px] leading-relaxed text-ink-2">
+              {r.names.join(' · ')}
+              {r.more > 0 && <span class="whitespace-nowrap text-muted">&nbsp;+{r.more} more</span>}
+            </p>
+          </li>
+        ))}
+      </ul>
+
+      <div class="flex items-center justify-center border-t border-line p-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pr-8">
+        <div class="w-[290px] max-w-full shadow-[7px_8px_0_-1px_rgba(24,22,15,0.16)]">
+          <DetectPanel />
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-ink/70 px-5 py-3 text-[11px] text-muted">
+      <span class="h-1 w-1 shrink-0 bg-redline"></span>
+      <span>Confidence-scored, evidence attached.</span>
+      <span class="text-line">/</span>
+      <span>Unknown is shown as <span class="text-ink">unknown</span> — never invented.</span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .registry {
+    background-image:
+      linear-gradient(rgba(24, 22, 15, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(24, 22, 15, 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .tick {
+    width: 14px;
+    height: 14px;
+    border-color: var(--color-redline);
+  }
+</style>
