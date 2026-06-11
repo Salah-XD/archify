@@ -8,7 +8,7 @@ export const GITHUB_URL = 'https://github.com/Salah-XD/archify';
  * the first-install welcome flow falls back to the GitHub repo so a new user
  * never lands on a dead tab.
  */
-export const SITE_URL = '';
+export const SITE_URL = 'https://archify.salahxd.dev';
 
 /** Opened once on first install. Falls back to the repo when SITE_URL is unset. */
 export const THANKS_URL = SITE_URL ? `${SITE_URL}/thanks` : GITHUB_URL;

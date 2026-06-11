@@ -44,7 +44,7 @@ PRIVACY
 Open source: https://github.com/Salah-XD/archify
 ```
 
-**Homepage URL:** `https://<your-vercel-deploy>/`  *(your deployed site)*
+**Homepage URL:** `https://archify.salahxd.dev`
 **Support URL:** `https://github.com/Salah-XD/archify/issues`
 
 ---
@@ -53,7 +53,7 @@ Open source: https://github.com/Salah-XD/archify
 
 **Privacy policy URL** (required — paste your deployed page):
 ```
-https://<your-vercel-deploy>/privacy
+https://archify.salahxd.dev/privacy
 ```
 
 **Single purpose** (required for MV3):
