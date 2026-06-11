@@ -14,6 +14,14 @@
 
 html { background: var(--color-paper); color: var(--color-ink); }
 
+/* Comfortable reading scale. The draughtsman type ramp is built on small px
+   sizes (11–13px body); at 100% it reads undersized on desktop displays.
+   Root zoom lifts the whole composition — same effect as the browser's 110%. */
+html { zoom: 1.1; }
+@media (min-width: 1920px) {
+  html { zoom: 1.2; }
+}
+
 /* Scrollbar themed to the draughtsman palette — paper track, ink thumb, redline on hover. */
 html {
   scrollbar-width: thin;                                   /* Firefox */
