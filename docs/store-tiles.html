@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Archify · Store tile maker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- Optional: matches the extension's font when online; falls back to system mono offline. -->
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#f6f4ee; --paper2:#efece1; --ink:#18160f; --ink2:#46412f;
+    --muted:#8c8675; --line:#d9d4c6; --redline:#df4f25;
+    --mono:"JetBrains Mono", ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper2);color:var(--ink);font-family:var(--mono);font-size:13px}
+  header{padding:14px 20px;border-bottom:1px solid var(--line);background:var(--paper)}
+  header b{letter-spacing:.28em}
+  header .tick{display:inline-block;width:9px;height:9px;background:var(--redline);margin-right:8px;vertical-align:1px}
+  header .hint{color:var(--muted);margin-left:10px}
+  .app{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 48px)}
+  .controls{border-right:1px solid var(--line);background:var(--paper);padding:16px;display:flex;flex-direction:column;gap:14px;overflow:auto}
+  .stage{padding:24px;display:flex;align-items:flex-start;justify-content:center;overflow:auto}
+  .group{display:flex;flex-direction:column;gap:6px}
+  .group > label{font-size:10px;letter-spacing:.16em;color:var(--muted);text-transform:uppercase}
+  .row{display:flex;flex-wrap:wrap;gap:6px}
+  button,select,input,textarea{font-family:var(--mono);font-size:12px;color:var(--ink)}
+  .seg button{border:1px solid var(--line);background:var(--paper);padding:5px 9px;cursor:pointer}
+  .seg button.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+  textarea,input[type=text]{border:1px solid var(--line);background:var(--paper);padding:7px;resize:vertical;width:100%}
+  textarea{min-height:46px}
+  select{border:1px solid var(--line);background:var(--paper);padding:6px}
+  .drop{border:1.5px dashed var(--line);background:var(--paper);padding:18px;text-align:center;cursor:pointer;color:var(--muted)}
+  .drop.hot{border-color:var(--redline);color:var(--ink)}
+  .drop small{display:block;margin-top:4px;font-size:10px}
+  .dl{border:1px solid var(--ink);background:var(--ink);color:var(--paper);padding:10px;cursor:pointer;font-weight:600;letter-spacing:.06em}
+  .dl:hover{background:var(--redline);border-color:var(--redline)}
+  .meta{font-size:10px;color:var(--muted);line-height:1.5}
+  canvas{max-width:100%;height:auto;border:1px solid var(--line);box-shadow:6px 7px 0 -1px rgba(24,22,15,.12)}
+  input[type=range]{width:100%}
+  .slider-val{font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <span class="tick"></span><b>ARCHIFY · STORE TILE MAKER</b>
+  <span class="hint">Pick a preset → drop your screenshot → Download. Exports at exactly 1280×800 (440×280 for promo).</span>
+</header>
+
+<div class="app">
+  <aside class="controls">
+    <div class="group">
+      <label>Format</label>
+      <div class="row seg" id="modeSeg">
+        <button data-mode="tile" class="on">Screenshot 1280×800</button>
+        <button data-mode="promo">Promo 440×280</button>
+      </div>
+    </div>
+
+    <div class="group" id="presetGroup">
+      <label>Preset headline</label>
+      <div class="row seg" id="presetSeg"></div>
+    </div>
+
+    <div class="group" id="dropGroup">
+      <label>Screenshot</label>
+      <div class="drop" id="drop">Click or drag a PNG/JPG here
+        <small id="dropName">no image loaded</small>
+      </div>
+      <input type="file" id="file" accept="image/*" hidden />
+    </div>
+
+    <div class="group">
+      <label>Headline</label>
+      <textarea id="headline"></textarea>
+    </div>
+    <div class="group">
+      <label>Subhead</label>
+      <input type="text" id="subhead" />
+    </div>
+
+    <div class="group" id="layoutGroup">
+      <label>Layout</label>
+      <div class="row seg" id="layoutSeg">
+        <button data-layout="stack" class="on">Stack (wide shot)</button>
+        <button data-layout="split">Split (tall popup)</button>
+      </div>
+    </div>
+
+    <div class="group">
+      <label>Headline size <span class="slider-val" id="sizeVal"></span></label>
+      <input type="range" id="size" min="28" max="64" step="1" />
+    </div>
+
+    <div class="group">
+      <label>Background</label>
+      <div class="row seg" id="bgSeg">
+        <button data-bg="paper" class="on">Paper</button>
+        <button data-bg="paper2">Paper-2</button>
+      </div>
+      <label style="display:flex;gap:6px;align-items:center;text-transform:none;letter-spacing:0;color:var(--ink)">
+        <input type="checkbox" id="grid" checked /> blueprint grid
+      </label>
+    </div>
+
+    <button class="dl" id="download">↓ Download PNG</button>
+    <p class="meta">Tip: capture the extension in a clean 1280-wide window. Narrow popup captures look best on the “Split” layout; full-page hover captures on “Stack”. Install JetBrains Mono locally for a pixel-exact brand match (otherwise your system mono is used).</p>
+  </aside>
+
+  <main class="stage"><canvas id="c"></canvas></main>
+</div>
+
+<script>
+const C = { paper:'#f6f4ee', paper2:'#efece1', ink:'#18160f', ink2:'#46412f', muted:'#8c8675', line:'#d9d4c6', redline:'#df4f25' };
+const FONT = "'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace";
+
+const PRESETS = [
+  { n:'1 · Hover',     headline:"Understand any web app — just by hovering.", subhead:"Framework, component, library, and the APIs it fires.", layout:'stack', size:46 },
+  { n:'2 · Profile',   headline:"The whole page at a glance.",                subhead:"Tech stack, where it's hosted, and its live API surface.", layout:'split', size:48 },
+  { n:'3 · Security',  headline:"See which scripts can read your card field.", subhead:"The client-side exposure a network firewall never shows.", layout:'split', size:40 },
+  { n:'4 · Inventory', headline:"Export a payment-script inventory in one click.", subhead:"Shaped for PCI DSS 6.4.3. Shareable in seconds.", layout:'split', size:38 },
+  { n:'5 · Local',     headline:"100% local. No account. Open source.",       subhead:"Hover to inspect · Alt+click to lock · Ctrl+Shift+H.", layout:'stack', size:46 },
+];
+
+const S = { mode:'tile', headline:PRESETS[0].headline, subhead:PRESETS[0].subhead, layout:'stack', size:46, bg:'paper', grid:true, img:null };
+
+const cv = document.getElementById('c');
+const ctx = cv.getContext('2d');
+
+function dims(){ return S.mode==='promo' ? {w:440,h:280} : {w:1280,h:800}; }
+
+function ls(px){ if('letterSpacing' in ctx) ctx.letterSpacing = px+'px'; }
+
+function wrap(text, font, maxW){
+  ctx.font = font;
+  const words = String(text).split(/\s+/);
+  const lines = []; let line = '';
+  for(const w of words){
+    const probe = line ? line+' '+w : w;
+    if(ctx.measureText(probe).width > maxW && line){ lines.push(line); line = w; }
+    else line = probe;
+  }
+  if(line) lines.push(line);
+  return lines;
+}
+
+function frame(w,h){
+  const m = S.mode==='promo' ? 12 : 24;
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.strokeRect(m, m, w-2*m, h-2*m);
+  ctx.strokeStyle = C.redline; ctx.lineWidth = 3;
+  const t = S.mode==='promo' ? 10 : 18;
+  const corners = [[m,m,1,1],[w-m,m,-1,1],[m,h-m,1,-1],[w-m,h-m,-1,-1]];
+  for(const [x,y,dx,dy] of corners){
+    ctx.beginPath(); ctx.moveTo(x+dx*t, y); ctx.lineTo(x, y); ctx.lineTo(x, y+dy*t); ctx.stroke();
+  }
+}
+
+function grid(w,h){
+  if(!S.grid) return;
+  ctx.strokeStyle = 'rgba(24,22,15,0.045)'; ctx.lineWidth = 1;
+  for(let x=32;x<w;x+=32){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+  for(let y=32;y<h;y+=32){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+}
+
+function eyebrow(x,y){
+  ctx.fillStyle = C.redline; ctx.fillRect(x, y-9, 11, 11);
+  ctx.fillStyle = C.ink; ctx.font = `600 16px ${FONT}`; ls(4); ctx.textBaseline='alphabetic';
+  ctx.fillText('ARCHIFY', x+22, y+2); ls(0);
+}
+
+function framedImage(slot){
+  if(!S.img){
+    ctx.save();
+    ctx.strokeStyle = C.line; ctx.setLineDash([8,6]); ctx.lineWidth = 2;
+    ctx.strokeRect(slot.x, slot.y, slot.w, slot.h);
+    ctx.setLineDash([]); ctx.fillStyle = C.muted; ctx.font = `14px ${FONT}`;
+    ctx.textAlign='center'; ctx.fillText('drop your screenshot', slot.x+slot.w/2, slot.y+slot.h/2);
+    ctx.textAlign='left'; ctx.restore();
+    return;
+  }
+  const img = S.img;
+  const scale = Math.min(slot.w/img.width, slot.h/img.height);
+  const dw = img.width*scale, dh = img.height*scale;
+  const dx = slot.x + (slot.w-dw)/2, dy = slot.y + (slot.h-dh)/2;
+  ctx.fillStyle = 'rgba(24,22,15,0.14)'; ctx.fillRect(dx+10, dy+12, dw, dh);   // hard offset shadow
+  ctx.drawImage(img, dx, dy, dw, dh);
+  ctx.strokeStyle = C.ink; ctx.lineWidth = 2; ctx.strokeRect(dx, dy, dw, dh);
+}
+
+function footer(w,h){
+  ctx.fillStyle = C.muted; ctx.font = `14px ${FONT}`; ls(1);
+  ctx.fillText('100% local · open source', 72, h-52); ls(0);
+}
+
+function renderTile(w,h){
+  if(S.layout==='split'){
+    const LX=80, LW=470;
+    const hFont = `700 ${S.size}px ${FONT}`, sFont = `20px ${FONT}`;
+    const hLines = wrap(S.headline, hFont, LW);
+    const sLines = wrap(S.subhead, sFont, LW);
+    const lh = S.size*1.16, slh = 28;
+    const blockH = 30 + hLines.length*lh + 14 + sLines.length*slh;
+    let y = (h-blockH)/2 + 30;
+    eyebrow(LX, y-30+9);
+    ctx.fillStyle = C.ink; ctx.font = hFont; ls(0);
+    for(const ln of hLines){ ctx.fillText(ln, LX, y+S.size*0.8); y += lh; }
+    y += 14; ctx.fillStyle = C.muted; ctx.font = sFont;
+    for(const ln of sLines){ ctx.fillText(ln, LX, y); y += slh; }
+    framedImage({ x:600, y:80, w:w-72-600, h:h-160 });
+  } else {
+    const px=72;
+    eyebrow(px, 100);
+    const hFont = `700 ${S.size}px ${FONT}`;
+    const hLines = wrap(S.headline, hFont, w-2*px);
+    let y = 150; ctx.fillStyle = C.ink; ctx.font = hFont; ls(0);
+    for(const ln of hLines){ ctx.fillText(ln, px, y+S.size*0.8); y += S.size*1.16; }
+    y += 6; ctx.fillStyle = C.muted; ctx.font = `20px ${FONT}`;
+    const sLines = wrap(S.subhead, `20px ${FONT}`, w-2*px);
+    for(const ln of sLines){ ctx.fillText(ln, px, y+14); y += 27; }
+    framedImage({ x:px, y:y+26, w:w-2*px, h:(h-104) - (y+26) });
+  }
+  footer(w,h);
+}
+
+function renderPromo(w,h){
+  // Centered wordmark + tagline — no screenshot needed.
+  ctx.textAlign='center';
+  ctx.fillStyle = C.redline; ctx.fillRect(w/2-7, 96, 14, 14);
+  ctx.fillStyle = C.ink; ctx.font = `700 30px ${FONT}`; ls(8);
+  ctx.fillText('ARCHIFY', w/2+4, 150); ls(0);
+  ctx.strokeStyle = C.line; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(w/2-90,168); ctx.lineTo(w/2+90,168); ctx.stroke();
+  ctx.fillStyle = C.ink2; ctx.font = `600 18px ${FONT}`;
+  ctx.fillText('Understand Software.', w/2, 198);
+  ctx.fillStyle = C.muted; ctx.font = `12px ${FONT}`; ls(1);
+  ctx.fillText('100% local · open source', w/2, 230); ls(0);
+  ctx.textAlign='left';
+}
+
+function render(){
+  const {w,h} = dims();
+  if(cv.width!==w||cv.height!==h){ cv.width=w; cv.height=h; }
+  ctx.textBaseline='alphabetic'; ctx.textAlign='left';
+  ctx.fillStyle = S.bg==='paper2' ? C.paper2 : C.paper; ctx.fillRect(0,0,w,h);
+  grid(w,h);
+  frame(w,h);
+  if(S.mode==='promo') renderPromo(w,h); else renderTile(w,h);
+}
+
+/* ---- controls ---- */
+function seg(id, key, after){
+  document.getElementById(id).addEventListener('click', e=>{
+    const b = e.target.closest('button'); if(!b) return;
+    [...e.currentTarget.children].forEach(c=>c.classList.toggle('on', c===b));
+    S[key] = b.dataset[key]; if(after) after(); render();
+  });
+}
+seg('modeSeg','mode', ()=>{
+  const tileOnly = S.mode!=='promo';
+  ['presetGroup','dropGroup','layoutGroup'].forEach(g=>document.getElementById(g).style.display = tileOnly?'':'none');
+  document.getElementById('headline').parentElement.style.display = tileOnly?'':'none';
+  document.getElementById('subhead').parentElement.style.display = tileOnly?'':'none';
+});
+seg('layoutSeg','layout');
+seg('bgSeg','bg');
+
+const presetSeg = document.getElementById('presetSeg');
+PRESETS.forEach((p,i)=>{
+  const b=document.createElement('button'); b.textContent=p.n; if(i===0)b.classList.add('on');
+  b.onclick=()=>{ [...presetSeg.children].forEach(c=>c.classList.toggle('on',c===b));
+    S.headline=p.headline; S.subhead=p.subhead; S.layout=p.layout; S.size=p.size;
+    document.getElementById('headline').value=p.headline;
+    document.getElementById('subhead').value=p.subhead;
+    document.getElementById('size').value=p.size; document.getElementById('sizeVal').textContent=p.size+'px';
+    [...document.getElementById('layoutSeg').children].forEach(c=>c.classList.toggle('on', c.dataset.layout===p.layout));
+    render();
+  };
+  presetSeg.appendChild(b);
+});
+
+const hl=document.getElementById('headline'), sh=document.getElementById('subhead'), sz=document.getElementById('size'), szv=document.getElementById('sizeVal');
+hl.value=S.headline; sh.value=S.subhead; sz.value=S.size; szv.textContent=S.size+'px';
+hl.oninput=()=>{S.headline=hl.value;render();};
+sh.oninput=()=>{S.subhead=sh.value;render();};
+sz.oninput=()=>{S.size=+sz.value;szv.textContent=sz.value+'px';render();};
+document.getElementById('grid').onchange=e=>{S.grid=e.target.checked;render();};
+
+const drop=document.getElementById('drop'), file=document.getElementById('file'), dropName=document.getElementById('dropName');
+function loadFile(f){ if(!f) return; const img=new Image(); img.onload=()=>{S.img=img;dropName.textContent=f.name;render();}; img.src=URL.createObjectURL(f); }
+drop.onclick=()=>file.click();
+file.onchange=e=>loadFile(e.target.files[0]);
+['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('hot');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('hot');}));
+drop.addEventListener('drop',e=>loadFile(e.dataTransfer.files[0]));
+
+document.getElementById('download').onclick=()=>{
+  cv.toBlob(b=>{ const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+    a.download = S.mode==='promo' ? 'archify-promo-440x280.png' : `archify-screenshot-${dims().w}x${dims().h}.png`;
+    a.click(); URL.revokeObjectURL(a.href);
+  }, 'image/png');
+};
+
+(document.fonts && document.fonts.ready ? document.fonts.ready : Promise.resolve()).then(render);
+render();
+</script>
+</body>
+</html>
