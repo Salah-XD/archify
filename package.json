@@ -1,6 +1,6 @@
 {
   "name": "archify",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Understand any web application — architecture and client-side security, in your browser.",
   "license": "Apache-2.0",
   "private": true,
