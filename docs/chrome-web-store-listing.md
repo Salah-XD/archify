@@ -7,11 +7,13 @@ Everything to paste into the [Developer Dashboard](https://chrome.google.com/web
 ## 1. Store listing
 
 **Name**
+
 ```
 Archify — Understand Software
 ```
 
 **Summary** (the "short description", ≤132 chars)
+
 ```
 Hover any web page to see its framework, components, APIs, and which scripts read your data. 100% local. Open source.
 ```
@@ -20,6 +22,7 @@ Hover any web page to see its framework, components, APIs, and which scripts rea
 **Language:** `English`
 
 **Detailed description**
+
 ```
 Archify — Understand Software.
 
@@ -52,16 +55,19 @@ Open source: https://github.com/Salah-XD/archify
 ## 2. Privacy
 
 **Privacy policy URL** (required — paste your deployed page):
+
 ```
 https://archify.salahxd.dev/privacy
 ```
 
 **Single purpose** (required for MV3):
+
 ```
 Archify helps developers understand a web page's architecture and client-side security by analyzing it locally in the browser — showing the framework, the component and UI library, the APIs an element triggers, and which scripts can access form and payment fields.
 ```
 
 **Data usage** (Privacy practices tab):
+
 - Does this extension collect or transmit user data? → **No.**
 - All listed data categories (PII, financial, auth, web history, user activity, website content, …) → **leave unchecked.** Archify reads page content *locally* to analyze it but never transmits or stores it off-device, which is what the store defines as "collection."
 - Certify all three: ✅ not sold to third parties · ✅ not used/transferred for purposes unrelated to the single purpose · ✅ not used to determine creditworthiness / for lending.
@@ -74,11 +80,11 @@ Archify helps developers understand a web page's architecture and client-side se
 
 Paste these in the "Permission justification" fields. Reviewers scrutinize `<all_urls>` most — the justification ties it directly to the single purpose.
 
-| Permission | Justification |
-|---|---|
+| Permission                               | Justification                                                                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **host permission `<all_urls>`** | Archify runs automatically on every page the user loads so the architecture and client-side-security read-out is ready the instant they hover an element or open the popup — it cannot know in advance which sites the user will inspect. Its content script and bundled MAIN-world script analyze each page locally; no page data is transmitted off the device. |
-| **scripting** | Used to inject Archify's analysis script into the page the user is inspecting (in the page's MAIN world) so it can read framework internals and intercept network calls. The injected script is bundled with the extension. |
-| **storage** | Stores a single local preference — whether the hover inspector is on or off. Stored on the user's device only; no user data is collected. |
+| **scripting**                      | Used to inject Archify's analysis script into the page the user is inspecting (in the page's MAIN world) so it can read framework internals and intercept network calls. The injected script is bundled with the extension.                                                                                                                                        |
+| **storage**                        | Stores a single local preference — whether the hover inspector is on or off. Stored on the user's device only; no user data is collected.                                                                                                                                                                                                                         |
 
 ---
 

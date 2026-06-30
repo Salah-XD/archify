@@ -171,4 +171,7 @@ export interface InteractionFlow {
   component: string | null;
   type: string;
   steps: FlowStep[];
+  /** True when this flow was traced on the previous page and carried across a
+   *  full-page navigation (reload / redirect) — the UI labels it as such. */
+  carried?: boolean;
 }

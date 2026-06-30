@@ -14,10 +14,17 @@ export function FlowTab({ flow }: { flow: InteractionFlow | null }) {
   }
   return (
     <div>
-      <div className="mb-1.5 text-[9px] tracking-[0.2em] text-muted">TRACED FROM YOUR CLICK</div>
+      <div className="mb-1.5 text-[9px] tracking-[0.2em] text-muted">
+        {flow.carried ? 'CARRIED FROM PREVIOUS PAGE' : 'TRACED FROM YOUR CLICK'}
+      </div>
       <div className="mb-2 font-mono text-[13px] font-semibold text-ink">
         ▸ {flow.component ? `<${flow.component}/>` : flow.type}
       </div>
+      {flow.carried && (
+        <p className="mb-2 text-[10px] leading-snug text-muted/80">
+          These steps ran on the page before this one — the click reloaded or redirected here.
+        </p>
+      )}
       <ol className="space-y-1.5">
         {flow.steps.map((s, i) => (
           <li key={i} className="flex items-start gap-2">

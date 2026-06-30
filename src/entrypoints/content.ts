@@ -4,6 +4,8 @@ import { FlowStore } from '../content/flowStore';
 import { mountOverlay } from '../content/overlay';
 import { assembleProfile, rollupSecurity, buildScriptInventory, buildApiSurface } from '../content/profile';
 import { ALL_DOM_SELECTORS } from '../engine/techStack';
+import { shouldCarry } from '../shared/carry';
+import type { InteractionFlow } from '../engine/types';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -17,6 +19,26 @@ export default defineContentScript({
     const overlay = mountOverlay(store, flow);
     let pageGlobals: string[] = [];
     let hostHeaders: Record<string, string> = {};
+
+    // Flow carry-across-navigation. A click that fires an API/storage write and
+    // then reloads or redirects the whole page would otherwise lose its flow when
+    // this content script is torn down. We (a) claim any flow the previous page
+    // parked for this tab and re-show it, and (b) park the current flow eagerly on
+    // every step (NOT debounced — a navigating click unloads within milliseconds)
+    // plus once more on pagehide as a backstop. See shared/carry.ts.
+    browser.runtime.sendMessage({ type: 'archify:claimFlow' })
+      .then((carried) => {
+        if (carried) { flow.hydrate(carried as InteractionFlow); overlay.refreshFlow(); }
+      })
+      .catch(() => { /* no background / not claimable — nothing to restore */ });
+
+    const carryFlow = () => {
+      const f = flow.latest();
+      if (shouldCarry(f)) {
+        void browser.runtime.sendMessage({ type: 'archify:carryFlow', flow: f }).catch(() => {});
+      }
+    };
+    window.addEventListener('pagehide', carryFlow);
 
     try {
       await injectScript('/injected.js', { keepInDom: true });
@@ -32,15 +54,15 @@ export default defineContentScript({
     document.addEventListener(channelName(nonce), (e) => {
       const m = (e as CustomEvent).detail;
       if (!isInjectedMessage(m)) return;
-      if (m.kind === 'network') { store.addNetwork(m.payload); flow.addApi(m.payload); overlay.refreshFlow(); }
+      if (m.kind === 'network') { store.addNetwork(m.payload); flow.addApi(m.payload); overlay.refreshFlow(); carryFlow(); }
       else if (m.kind === 'script') store.addScript(m.payload);
       else if (m.kind === 'inputAccess') store.addInputAccess(m.payload);
       else if (m.kind === 'hover') overlay.onHover(m.payload);
       else if (m.kind === 'pick') overlay.onPick(m.payload);
       else if (m.kind === 'pageGlobals') pageGlobals = [...new Set([...pageGlobals, ...m.payload.globals])];
       else if (m.kind === 'interaction') flow.openInteraction(m.payload);
-      else if (m.kind === 'storage') { flow.addStorage(m.payload); overlay.refreshFlow(); }
-      else if (m.kind === 'nav') { flow.addNav(m.payload); overlay.refreshFlow(); }
+      else if (m.kind === 'storage') { flow.addStorage(m.payload); overlay.refreshFlow(); carryFlow(); }
+      else if (m.kind === 'nav') { flow.addNav(m.payload); overlay.refreshFlow(); carryFlow(); }
     });
 
     ctx.addEventListener(window, 'wxt:locationchange', () => {

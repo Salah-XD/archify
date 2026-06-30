@@ -42,6 +42,13 @@ export class FlowStore {
   latest(): InteractionFlow | null { return this.latestFlow; }
   reset() { this.open = null; this.latestFlow = null; }
 
+  /** Restore a flow traced on the previous page (carried across a navigation).
+   *  Tagged `carried` for the UI; the next openInteraction replaces it as usual. */
+  hydrate(flow: InteractionFlow) {
+    this.open = null;
+    this.latestFlow = { ...flow, carried: true };
+  }
+
   private push(attr: Attribution | null, step: FlowStep) {
     if (!attr || !this.open || attr.interactionId !== this.open.id) return;
     this.open.steps.push(step);

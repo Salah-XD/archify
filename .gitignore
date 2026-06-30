@@ -4,6 +4,12 @@ Founder Operating Document/
 # Glasswatch is a separate product — lives in its own repo
 new project idea/
 
+# Launch video — separate sub-project (renders + snapshots), kept local
+archify-video/
+
+# Windows null-device artifact (accidental redirect to `nul`)
+nul
+
 # Dependencies
 node_modules/
 
