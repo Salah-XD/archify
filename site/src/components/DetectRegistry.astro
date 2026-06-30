@@ -69,7 +69,7 @@ const rows = [
     <span aria-hidden="true" class="tick absolute -bottom-px -right-px border-b-2 border-r-2"></span>
 
     <div class="grid lg:grid-cols-[1fr_auto]">
-      <ul class="divide-y divide-line p-2 sm:p-4">
+      <ul class="min-w-0 divide-y divide-line p-2 sm:p-4">
         {rows.map((r) => (
           <li class="group grid gap-x-5 gap-y-1 px-2 py-4 sm:grid-cols-[2rem_11.5rem_1fr] sm:px-3">
             <span class="font-mono text-sm font-semibold text-muted transition-colors group-hover:text-redline">{r.n}</span>
@@ -82,8 +82,8 @@ const rows = [
         ))}
       </ul>
 
-      <div class="flex items-center justify-center border-t border-line p-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pr-8">
-        <div class="w-[290px] max-w-full shadow-[7px_8px_0_-1px_rgba(24,22,15,0.16)]">
+      <div class="flex min-w-0 items-center justify-center border-t border-line p-4 sm:p-6 lg:border-l lg:border-t-0 lg:pl-8 lg:pr-8">
+        <div class="w-full max-w-[290px] shadow-[7px_8px_0_-1px_rgba(24,22,15,0.16)]">
           <DetectPanel />
         </div>
       </div>

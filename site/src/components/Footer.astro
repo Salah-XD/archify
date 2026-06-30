@@ -1,11 +1,78 @@
 ---
-import { GITHUB_URL } from '../consts';
+import { GITHUB_URL, WEBSTORE_URL, GLASSWATCH_URL, SITE_DESC } from '../consts';
+const published = WEBSTORE_URL !== '#';
+const year = new Date().getFullYear();
+
+const explore = [
+  { href: '#how', label: 'How it works' },
+  { href: '#detects', label: 'What it detects' },
+  { href: '#compare', label: 'vs DevTools' },
+  { href: '#security', label: 'Security' },
+];
+const project = [
+  { href: GITHUB_URL, label: 'GitHub', external: true },
+  { href: '/privacy', label: 'Privacy', external: false },
+  ...(published ? [{ href: WEBSTORE_URL, label: 'Chrome Web Store', external: true }] : []),
+];
 ---
 <footer class="border-t border-line">
-  <div class="mx-auto flex max-w-5xl flex-wrap items-center gap-4 px-6 py-8 text-[11px] text-muted">
-    <span class="font-semibold tracking-[0.28em] text-ink">ARCHIFY</span>
-    <a href={GITHUB_URL} target="_blank" rel="noopener noreferrer" class="hover:text-ink">GitHub</a>
-    <a href="/privacy" class="hover:text-ink">Privacy</a>
-    <span class="ml-auto">Open source · Apache-2.0</span>
+  <div class="mx-auto max-w-5xl px-6 py-14">
+    <div class="grid gap-12 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
+      <!-- Brand + tagline + Product Hunt -->
+      <div class="max-w-xs">
+        <div class="flex items-center gap-2">
+          <span class="h-1.5 w-1.5 bg-redline"></span>
+          <span class="text-[12px] font-semibold tracking-[0.3em] text-ink">ARCHIFY</span>
+        </div>
+        <p class="mt-3 text-[12px] leading-relaxed text-muted">{SITE_DESC}</p>
+        <a href="https://www.producthunt.com/products/archify?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-archify"
+           target="_blank" rel="noopener noreferrer"
+           class="mt-5 inline-block transition-opacity hover:opacity-80">
+          <img
+            src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1178256&theme=light&t=1782842168524"
+            alt="Archify — understand software | Product Hunt"
+            width="250" height="54" loading="lazy" />
+        </a>
+      </div>
+
+      <!-- Explore -->
+      <nav aria-label="Explore">
+        <h2 class="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink">Explore</h2>
+        <ul class="mt-4 space-y-2.5 text-[11px] text-muted">
+          {explore.map((l) => (
+            <li><a href={l.href} class="hover:text-ink">{l.label}</a></li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- Project -->
+      <nav aria-label="Project">
+        <h2 class="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink">Project</h2>
+        <ul class="mt-4 space-y-2.5 text-[11px] text-muted">
+          {project.map((l) => (
+            <li>
+              <a href={l.href} class="hover:text-ink"
+                 {...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>{l.label}</a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+
+      <!-- Also by us -->
+      <div>
+        <h2 class="text-[10px] font-semibold uppercase tracking-[0.28em] text-ink">Also by us</h2>
+        <a href={GLASSWATCH_URL} target="_blank" rel="noopener noreferrer"
+           class="mt-4 inline-flex items-center gap-1.5 text-[11px] font-semibold text-redline hover:text-ink">
+          Glasswatch <span aria-hidden="true">→</span>
+        </a>
+        <p class="mt-2 text-[11px] leading-relaxed text-muted">Continuous client-side monitoring, across every deploy.</p>
+      </div>
+    </div>
+
+    <div class="mt-12 flex flex-wrap items-center gap-4 border-t border-line pt-6 text-[11px] text-muted">
+      <span>© {year} Archify</span>
+      <span>Built to understand software.</span>
+      <span class="ml-auto">Open source · Apache-2.0</span>
+    </div>
   </div>
 </footer>
