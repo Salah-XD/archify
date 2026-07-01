@@ -6,6 +6,9 @@ new project idea/
 
 # Launch video — separate sub-project (renders + snapshots), kept local
 archify-video/
+archify-launch-video/
+archify webmail inlined.html
+archify webmail.html
 
 # Windows null-device artifact (accidental redirect to `nul`)
 nul
