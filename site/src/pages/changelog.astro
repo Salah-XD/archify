@@ -1,0 +1,56 @@
+---
+import Base from '../layouts/Base.astro';
+import Footer from '../components/Footer.astro';
+// Single source of truth: the repo-root CHANGELOG.md (also pasted into the
+// Chrome Web Store release notes). Parsed at build time — no client JS.
+import raw from '../../../CHANGELOG.md?raw';
+
+type Block =
+  | { kind: 'version'; text: string; slug: string }
+  | { kind: 'category'; text: string }
+  | { kind: 'bullets'; items: string[] }
+  | { kind: 'para'; text: string };
+
+const blocks: Block[] = [];
+for (const line of raw.split(/\r?\n/)) {
+  const t = line.trim();
+  if (!t || t.startsWith('# ')) continue; // file title — the page has its own
+  if (t.startsWith('## ')) {
+    const text = t.slice(3);
+    const version = text.split(/\s/)[0]; // "0.3.0 — 2026-07-20" → "0.3.0"
+    blocks.push({ kind: 'version', text, slug: version.replace(/\./g, '-') });
+  } else if (t.startsWith('### ')) {
+    blocks.push({ kind: 'category', text: t.slice(4) });
+  } else if (t.startsWith('- ')) {
+    const last = blocks[blocks.length - 1];
+    if (last?.kind === 'bullets') last.items.push(t.slice(2));
+    else blocks.push({ kind: 'bullets', items: [t.slice(2)] });
+  } else if (blocks.some((b) => b.kind === 'version')) {
+    // Prose inside a release renders as a paragraph; the file's intro
+    // paragraph (before any version) is skipped — the page has its own lede.
+    blocks.push({ kind: 'para', text: t });
+  }
+}
+---
+<Base title="Changelog — Archify" description="What changed in each Archify release.">
+  <article class="mx-auto max-w-2xl px-6 py-16 text-[13px] leading-relaxed text-ink-2">
+    <div class="mb-6 flex items-center gap-2">
+      <span class="h-1.5 w-1.5 bg-redline"></span>
+      <span class="text-[11px] font-semibold tracking-[0.3em] text-ink">CHANGELOG</span>
+    </div>
+    <h1 class="mb-2 text-2xl font-semibold tracking-tight text-ink">Every release, in plain text.</h1>
+    <p class="mb-4 text-muted">The same notes we publish to the Chrome Web Store.</p>
+    {blocks.map((b) =>
+      b.kind === 'version' ? (
+        <h2 id={b.slug} class="mt-10 scroll-mt-24 border-t border-line pt-6 text-base font-semibold text-ink">{b.text}</h2>
+      ) : b.kind === 'category' ? (
+        <h3 class="mb-1 mt-4 text-sm font-semibold text-ink">{b.text}</h3>
+      ) : b.kind === 'bullets' ? (
+        <ul class="ml-4 list-disc space-y-1">{b.items.map((i) => <li>{i}</li>)}</ul>
+      ) : (
+        <p class="mt-2">{b.text}</p>
+      )
+    )}
+  </article>
+  <Footer />
+</Base>
