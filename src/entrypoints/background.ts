@@ -1,5 +1,6 @@
 import { toggleHoverEnabled } from '../shared/settings';
-import { THANKS_URL } from '../shared/links';
+import { THANKS_URL, changelogUrlFor } from '../shared/links';
+import { shouldAnnounceUpdate } from '../shared/version';
 import { carryKey, isCarryFresh, type CarryRecord } from '../shared/carry';
 import type { InteractionFlow } from '../engine/types';
 
@@ -11,9 +12,18 @@ export default defineBackground(() => {
     if (command === 'toggle-hover') void toggleHoverEnabled();
   });
 
-  // First install → open the welcome / thank-you page once (never on update).
-  browser.runtime.onInstalled.addListener(({ reason }) => {
+  // First install → open the welcome / thank-you page once. Feature updates
+  // (major/minor bump only — never patches) → open the site changelog at the
+  // new version's anchor. Both are fire-and-forget: a failed tab never
+  // affects the install/update itself.
+  browser.runtime.onInstalled.addListener(({ reason, previousVersion }) => {
     if (reason === 'install') void browser.tabs.create({ url: THANKS_URL });
+    if (reason === 'update') {
+      const current = browser.runtime.getManifest().version;
+      if (shouldAnnounceUpdate(previousVersion, current)) {
+        void browser.tabs.create({ url: changelogUrlFor(current) });
+      }
+    }
   });
 
   // Architecture Flow carry-across-navigation. The content script parks its

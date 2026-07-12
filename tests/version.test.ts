@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { shouldAnnounceUpdate } from '../src/shared/version';
+import { changelogUrlFor } from '../src/shared/links';
 
 describe('shouldAnnounceUpdate', () => {
   it('announces a minor bump', () => {
@@ -29,5 +30,14 @@ describe('shouldAnnounceUpdate', () => {
     expect(shouldAnnounceUpdate('0.2', '0.3')).toBe(true);
     expect(shouldAnnounceUpdate('0.2.0.1', '0.3.0.0')).toBe(true);
     expect(shouldAnnounceUpdate('0.3.0.0', '0.3.0.1')).toBe(false);
+  });
+});
+
+describe('changelogUrlFor', () => {
+  it('deep-links to the version anchor on the site changelog', () => {
+    expect(changelogUrlFor('0.3.0')).toBe('https://archify.salahxd.dev/changelog#0-3-0');
+  });
+  it('slugs every dot, including four-segment versions', () => {
+    expect(changelogUrlFor('1.2.3.4')).toBe('https://archify.salahxd.dev/changelog#1-2-3-4');
   });
 });

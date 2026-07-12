@@ -12,3 +12,13 @@ export const SITE_URL = 'https://archify.salahxd.dev';
 
 /** Opened once on first install. Falls back to the repo when SITE_URL is unset. */
 export const THANKS_URL = SITE_URL ? `${SITE_URL}/thanks` : GITHUB_URL;
+
+/**
+ * Opened once when the extension updates to a new major/minor version
+ * (see shared/version.ts). Falls back to the repo when SITE_URL is unset —
+ * without a site there is no changelog page, so no anchor either.
+ */
+export function changelogUrlFor(version: string): string {
+  if (!SITE_URL) return GITHUB_URL;
+  return `${SITE_URL}/changelog#${version.replace(/\./g, '-')}`;
+}
