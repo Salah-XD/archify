@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { browser } from 'wxt/browser';
 import type { PageProfile, TechDetection, ApiSurface } from '../../engine/types';
 import { getHoverEnabled, setHoverEnabled } from '../../shared/settings';
+import { recordProfileView, dismissReviewNudge } from '../../shared/reviewNudge';
+import { REVIEW_URL } from '../../shared/links';
 import { inventoryMarkdown, drawShareCard, exportCard } from './share';
 import { isRestrictedUrl } from '../../shared/pageKind';
 
@@ -13,6 +15,7 @@ type State =
 
 export function Popup() {
   const [state, setState] = useState<State>({ status: 'loading' });
+  const [showNudge, setShowNudge] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -21,7 +24,12 @@ export function Popup() {
       const restricted = isRestrictedUrl(tab.url);
       try {
         const profile = (await browser.tabs.sendMessage(tab.id, { type: 'archify:getProfile' })) as PageProfile | undefined;
-        if (profile) return setState({ status: 'ok', profile });
+        if (profile) {
+          // A real profile rendered = a successful use; count it toward the
+          // one-time review ask. A storage failure only delays the ask.
+          recordProfileView().then(setShowNudge).catch(() => {});
+          return setState({ status: 'ok', profile });
+        }
         setState(restricted ? { status: 'unavailable' } : { status: 'reload', tabId: tab.id });
       } catch {
         // sendMessage threw → no content script listening. On a normal page that
@@ -55,7 +63,25 @@ export function Popup() {
 
       {/* Pinned: the share/export actions must never scroll below the fold. */}
       {state.status === 'ok' && <ShareRow profile={state.profile} />}
+      {state.status === 'ok' && showNudge && <ReviewNudge onDone={() => setShowNudge(false)} />}
       <HoverToggle />
+    </div>
+  );
+}
+
+/** One-time review ask: earned (5th successful use), honest, and gone forever once acted on. */
+function ReviewNudge({ onDone }: { onDone: () => void }) {
+  const done = () => { void dismissReviewNudge(); onDone(); };
+  return (
+    <div className="flex shrink-0 items-center justify-between gap-2 border-t border-ink/80 px-3 py-2 text-[10px]">
+      <span className="text-muted">Enjoying Archify?</span>
+      <button
+        onClick={() => { void browser.tabs.create({ url: REVIEW_URL }); done(); }}
+        className="tracking-wide text-redline hover:text-ink"
+      >
+        ★ Review — 30 seconds
+      </button>
+      <button onClick={done} aria-label="Dismiss" className="text-muted hover:text-ink">✕</button>
     </div>
   );
 }

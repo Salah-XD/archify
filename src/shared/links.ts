@@ -22,3 +22,7 @@ export function changelogUrlFor(version: string): string {
   if (!SITE_URL) return GITHUB_URL;
   return `${SITE_URL}/changelog#${version.replace(/\./g, '-')}`;
 }
+
+/** The extension's Chrome Web Store reviews page — target of the one-time review ask. */
+export const REVIEW_URL =
+  'https://chromewebstore.google.com/detail/nhangkbdjnopgkgklfdkpfgmendlckpe/reviews';
