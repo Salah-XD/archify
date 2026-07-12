@@ -2,6 +2,8 @@
 
 Everything to paste into the [Developer Dashboard](https://chrome.google.com/webstore/devconsole). The extension package is `npm run zip` → `.output/archify-<version>-chrome.zip`. Icons ship in the manifest (`/icon/{16,32,48,128}.png`).
 
+**Every release:** add the new version's section to the root `CHANGELOG.md` *before* `npm run zip` — the site's `/changelog` page renders that file, the extension deep-links to `#<x-y-z>` on update, and the same section is pasted into the dashboard's release notes.
+
 ---
 
 ## 1. Store listing
