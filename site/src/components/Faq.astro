@@ -6,6 +6,9 @@ const faqs = [
   { q: 'Which frameworks does it detect?', a: 'React, Next.js, Vue, Angular, Svelte and more. One honest caveat: exact component names are only available on development builds — on minified production code Archify shows the component type and a confidence score rather than fabricating a name.' },
   { q: 'Does it work on any site?', a: 'Any web page you choose to inspect. It does not run on browser-internal pages (chrome://) or the extension store, by browser policy.' },
   { q: 'Is it a DevTools replacement?', a: 'No. DevTools shows you the implementation. Archify shows you the architecture — the component, the API it calls, and what reads your data. They sit side by side.' },
+  { q: 'Does it handle single-page apps and lazy-loaded modules?', a: 'Yes. Archify reads the live DOM and the browser\'s resource log, so modules that load later are detected when they arrive — and the hover inspector evaluates the element under your cursor at that moment, not at page load.' },
+  { q: 'Does it work on pages behind a login?', a: 'Yes. Archify inspects whatever page your browser is showing, including authenticated pages. Analysis runs locally; nothing about the page — or your session — leaves your machine.' },
+  { q: 'Will it slow down heavy apps?', a: 'It\'s designed not to. The hover inspector is opt-in (off by default), analysis runs on demand rather than continuously, and the extension makes exactly one network request — a same-origin fetch to read the page\'s own hosting headers.' },
 ];
 ---
 <section class="mx-auto max-w-3xl px-6 py-20">

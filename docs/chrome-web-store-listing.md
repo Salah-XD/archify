@@ -46,6 +46,17 @@ CONTROLS
 PRIVACY
 100% local. Archify never stores or transmits page contents; per-tab analysis is destroyed when you navigate away. The only network request it makes is a same-origin call to the page's own URL, to read its hosting headers — nothing is sent to us or any third party.
 
+FAQ
+
+Q: Does it handle single-page apps and lazy-loaded modules?
+A: Yes. Archify reads the live DOM and the browser's resource log, so modules that load later are detected when they arrive — the hover inspector evaluates the element under your cursor at that moment, not at page load.
+
+Q: Does it work on pages behind a login?
+A: Yes. Archify inspects whatever page your browser is showing, including authenticated pages. Analysis runs locally; nothing about the page — or your session — leaves your machine.
+
+Q: Will it slow down heavy apps?
+A: It's designed not to. The hover inspector is opt-in (off by default), analysis runs on demand, and the extension makes exactly one network request — a same-origin fetch to read the page's own hosting headers.
+
 Open source: https://github.com/Salah-XD/archify
 ```
 
